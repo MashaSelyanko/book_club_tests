@@ -1,0 +1,48 @@
+plugins {
+    id("java")
+    id("io.qameta.allure") version "4.0.2"
+    id 'io.freefair.lombok' version "9.2.0"
+
+}
+
+group = "selyanko.masha"
+version = "1.0-SNAPSHOT"
+
+
+def slf4jVersion = "2.0.17"
+allure {
+    version.set("2.29.0")
+    adapter {                                   // отвечает за появление папки build/allure-results
+        aspectjWeaver.set(true)                 //обработка аннотации @Step
+        frameworks {
+            junit5 {                            //фреймворк
+                adapterVersion.set("2.19.0")    //версия интеграции фреймворка и Allure
+            }
+        }
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation(platform("org.junit:junit-bom:5.10.0")) //обращаем внимание на bom
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("io.rest-assured:rest-assured:6.0.0")
+    testImplementation("io.rest-assured:json-schema-validator:6.0.0")
+    implementation('com.github.javafaker:javafaker:1.0.2')
+    testImplementation("org.assertj:assertj-core:3.27.7")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")  //диссереализатор json
+    testImplementation("com.codeborne:selenide:7.15.0")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("com.opencsv:opencsv:5.12.0")
+    testImplementation("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.21.3")
+    testImplementation("io.qameta.allure:allure-selenide:2.34.0")
+
+}
+
+tasks.withType(Test) {
+    useJUnitPlatform()
+    systemProperties(System.getProperties())
+}
