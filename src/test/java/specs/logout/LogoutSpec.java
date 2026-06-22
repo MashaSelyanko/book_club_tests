@@ -17,7 +17,7 @@ public class LogoutSpec {
             .contentType(ContentType.JSON)
             .basePath("/api/v1"); //для проверки версионности отдельно указываем
 
-    //спецификация для ответа для теста: 200 статус-код (успешный logout)
+    //спецификация для 200 статус-кода (успешный logout)
     public static ResponseSpecification successfulLogoutResponseSpec = new ResponseSpecBuilder()
             .log(ALL)                                 //вместо .log().all()
             .expectStatusCode(200)  // вместо .statusCode(200)
@@ -25,67 +25,14 @@ public class LogoutSpec {
                     "schemas/logout/successful_logout_response_schema.json"))
             .expectBody("refresh", notNullValue())
             .build();
+
+    //спецификация для 401 статус-кода (некорректный logout)
+    public static ResponseSpecification invalidLogoutResponseSpec = new ResponseSpecBuilder()
+            .log(ALL)                                 //вместо .log().all()
+            .expectStatusCode(401)
+            .expectBody(matchesJsonSchemaInClasspath(
+                    "schemas/logout/invalid_logout_response_schema.json"))
+            .expectBody("detail", notNullValue())
+            .expectBody("code", notNullValue())
+            .build();
 }
-
-//        //спецификация для ответа для теста: 401 статус-код (некорректный password)
-//    public static ResponseSpecification wrongPasswordLoginResponseSpec = new ResponseSpecBuilder()
-//            .log(ALL)                                 //вместо .log().all()
-//            .expectStatusCode(401)  // вместо .statusCode(200)
-//            .expectBody(matchesJsonSchemaInClasspath(
-//                    "schemas/logout/successful_logout_response_schema.json"))
-//            .expectBody("detail", notNullValue())
-//            .build();
-//
-////спецификация для ответа для теста: 401 статус-код (некорректный username)
-//
-//public static ResponseSpecification wrongUsernameLoginResponseSpec = new ResponseSpecBuilder()
-//        .log(ALL)                                 //вместо .log().all()
-//        .expectStatusCode(401)  // вместо .statusCode(200)
-//        .expectBody(matchesJsonSchemaInClasspath(
-//                "schemas/login/wrong_credentials_login_response_schema.json"))
-//        .expectBody("detail", notNullValue())
-//        .build();
-//
-////спецификация для ответа для теста: 400 статус-код (пустой username)
-//
-//    public static ResponseSpecification emptyUsernameLoginResponseSpec = new ResponseSpecBuilder()
-//            .log(ALL)                                 //вместо .log().all()
-//            .expectStatusCode(400)  // вместо .statusCode(200)
-//            .expectBody(matchesJsonSchemaInClasspath(
-//                    "schemas/login/empty_login_response_schema.json"))
-//            .expectBody("username", notNullValue())
-//            .build();
-//
-////спецификация для ответа для теста: 400 статус-код (пустой password)
-//
-//    public static ResponseSpecification emptyPasswordLoginResponseSpec = new ResponseSpecBuilder()
-//            .log(ALL)                                 //вместо .log().all()
-//            .expectStatusCode(400)  // вместо .statusCode(200)
-//            .expectBody(matchesJsonSchemaInClasspath(
-//                    "schemas/login/empty_password_response_schema.json"))
-//            .expectBody("password", notNullValue())
-//            .build();
-//
-//    //спецификация для ответа для теста: 400 статус-код (username = null)
-//
-//    public static ResponseSpecification nullUsernameLoginResponseSpec = new ResponseSpecBuilder()
-//            .log(ALL)                                 //вместо .log().all()
-//            .expectStatusCode(400)  // вместо .statusCode(200)
-//            .expectBody(matchesJsonSchemaInClasspath(
-//                    "schemas/login/empty_login_response_schema.json"))
-//            .expectBody("username", notNullValue())
-//            .build();
-//
-//    //спецификация для ответа для теста: 400 статус-код (username = null)
-//
-//    public static ResponseSpecification emptyJSONLoginResponseSpec = new ResponseSpecBuilder()
-//            .log(ALL)                                 //вместо .log().all()
-//            .expectStatusCode(400)  // вместо .statusCode(200)
-//            .build();
-//}
-
-
-
-
-
-

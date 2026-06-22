@@ -9,16 +9,13 @@ import static io.restassured.RestAssured.with;
 import static io.restassured.filter.log.LogDetail.ALL;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.notNullValue;
+import static specs.BaseSpec.baseRequestSpec;
 
 public class RegistrationSpec {
 
-    // спецификация для запроса
-    public static RequestSpecification RegistrationRequestSpec = with()
-            .log().all()
-            .contentType(ContentType.JSON)
-            .basePath("/api/v1"); //для проверки версионности отдельно указываем
+    public static RequestSpecification registrationRequestSpec = baseRequestSpec;
 
-    // спецификация для ответа для теста: 200 статус-код при получении токена
+   // спецификация для ответа для теста: 200 статус-код при получении токена
     public static ResponseSpecification successfulRegistrationResponseSpec = new ResponseSpecBuilder()
             .log(ALL)                                 //вместо .log().all()
             .expectStatusCode(201)  // вместо .statusCode(201)

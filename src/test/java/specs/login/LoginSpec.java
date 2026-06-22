@@ -49,8 +49,8 @@ public static ResponseSpecification wrongUsernameLoginResponseSpec = new Respons
 //спецификация для ответа для теста: 400 статус-код (пустой username)
 
     public static ResponseSpecification emptyUsernameLoginResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/login/empty_login_response_schema.json"))
             .expectBody("username", notNullValue())

@@ -10,7 +10,7 @@ public class TestData {
             username = faker.name().firstName(),
             password = faker.name().firstName(),
             exceedingMaxLengthUsername = "2".repeat(151),
-            exceedingMaxLengthPassword = "3".repeat(128);
+            exceedingMaxLengthPassword = "3".repeat(129);
 
     //валидные тестовые данные
     public static final String
@@ -22,7 +22,9 @@ public class TestData {
             WRONG_PASSWORD = "gaguru12",
             WRONG_USERNAME = "gaguru000",
             EMPTY_VALUE = "",
-            NULL_VALUE = null;
+            NULL_VALUE = null,
+            INVALID_TOKEN = faker.lorem().characters(16, 32,
+                    true, true);
 
     public static final String
             IP_ADDRESS_REGEXP = "^((25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)\\.){3}(25[0-5]|(2[0-4]|1\\d|[1-9]|)\\d)$",
@@ -33,10 +35,10 @@ public class TestData {
             EXPECTED_ERROR_WRONG_USERNAME = "Invalid username or password.",
             EXPECTED_ERROR_EMPTY_FIELD = "This field may not be blank.",
             EXPECTED_ERROR_NULL_FIELD = "This field may not be null.",
-            EXPECTED_ERROR_JSON_PARSE = "JSON parse error - unexpected character: line 1 column 1 (char 0)";
-
-
-
+            EXPECTED_ERROR_JSON_PARSE = "JSON parse error - unexpected character: line 1 column 1 (char 0)",
+            EXPECTED_ERROR_INVALID_TOKEN = "Token is invalid",
+            EXPECTED_ERROR_TOKEN_IS_BLACKLISTED = "Token is blacklisted",
+            EXPECTED_TOKEN_NOT_VALID_CODE = "token_not_valid";
 
 
 

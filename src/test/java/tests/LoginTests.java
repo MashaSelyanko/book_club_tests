@@ -121,11 +121,12 @@ public class LoginTests extends TestBase {
 
     @DisplayName("Негативный тест - 400 статус-код - пустой password")
     @Test
-    public void EmptyPasswordLoginTest() {
+    public void emptyPasswordLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.VALID_USERNAME, TestData.EMPTY_VALUE);
 
         EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -143,11 +144,12 @@ public class LoginTests extends TestBase {
 
     @DisplayName("Негативный тест - 400 статус-код - username = null")
     @Test
-    public void NullUsernameLoginTest() {
+    public void nullUsernameLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.VALID_PASSWORD);
 
         EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -165,11 +167,12 @@ public class LoginTests extends TestBase {
 
     @DisplayName("Негативный тест - 400 статус-код  - пустой JSON")
     @Test
-    public void EmptyJsonLoginTest() {
+    public void emptyJsonLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
 
         EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -194,6 +197,7 @@ public class LoginTests extends TestBase {
 
         // отправляем строку напрямую и десериализуем в готовую модель ошибок
         WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(brokenBody)
                 .when()
                 .post("/auth/token/")
