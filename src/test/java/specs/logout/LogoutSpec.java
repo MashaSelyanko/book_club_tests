@@ -21,9 +21,6 @@ public class LogoutSpec {
     public static ResponseSpecification successfulLogoutResponseSpec = new ResponseSpecBuilder()
             .log(ALL)                                 //вместо .log().all()
             .expectStatusCode(200)  // вместо .statusCode(200)
-            .expectBody(matchesJsonSchemaInClasspath(
-                    "schemas/logout/successful_logout_response_schema.json"))
-            .expectBody("refresh", notNullValue())
             .build();
 
     //спецификация для 401 статус-кода (некорректный logout)

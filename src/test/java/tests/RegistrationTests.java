@@ -1,7 +1,6 @@
 package tests;
 
 import TestData.TestData;
-import io.restassured.specification.RequestSpecification;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
@@ -10,7 +9,6 @@ import org.junit.jupiter.api.Test;
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.BaseSpec.baseRequestSpec;
 import static specs.registration.RegistrationSpec.*;
 
 public class RegistrationTests extends TestBase {

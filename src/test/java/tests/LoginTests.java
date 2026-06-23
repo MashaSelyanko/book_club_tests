@@ -10,7 +10,6 @@ import models.login.WrongCredentialsLoginResponseModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.List;
-
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,6 +26,7 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel(TestData.VALID_USERNAME, TestData.VALID_PASSWORD);
 
         SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -58,6 +58,7 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel(testData.VALID_USERNAME, TestData.WRONG_PASSWORD);
 
         WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -81,6 +82,7 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.VALID_PASSWORD);
 
         WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")
@@ -104,6 +106,7 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.VALID_PASSWORD);
 
         EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+                .config(timeoutConfig)
                 .body(loginData)
                 .when()
                 .post("/auth/token/")

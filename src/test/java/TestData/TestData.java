@@ -6,16 +6,16 @@ public class TestData {
 
     public static Faker faker = new Faker();
 
-    public String
-            username = faker.name().firstName(),
-            password = faker.name().firstName(),
+    public static String
+            username = "Usr_" + System.currentTimeMillis(),
+            password = "Pwd_" + System.currentTimeMillis(),
             exceedingMaxLengthUsername = "2".repeat(151),
             exceedingMaxLengthPassword = "3".repeat(129);
 
     //валидные тестовые данные
     public static final String
-            VALID_USERNAME = "gaguru222",
-            VALID_PASSWORD = "gaguru1234";
+            VALID_USERNAME = "gaguru2222",
+            VALID_PASSWORD = "gaguru12345";
 
     // невалидные данные для негативных тестов
     public static final String
