@@ -6,11 +6,16 @@ public class TestData {
 
     public static Faker faker = new Faker();
 
-    public static String
-            username = "Usr_" + System.currentTimeMillis(),
-            password = "Pwd_" + System.currentTimeMillis(),
-            exceedingMaxLengthUsername = "2".repeat(151),
-            exceedingMaxLengthPassword = "3".repeat(129);
+    public static String getRandomUsername() {
+        return "Usr_" + System.currentTimeMillis();
+    }
+
+    public static String getRandomPassword() {
+        return "Pwd_" + System.currentTimeMillis();
+    }
+
+    public static final String exceedingMaxLengthUsername = "2".repeat(151);
+    public static final String exceedingMaxLengthPassword = "3".repeat(129);
 
     //валидные тестовые данные
     public static final String

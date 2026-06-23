@@ -18,8 +18,11 @@ public class RegistrationTests extends TestBase {
     @Test
     public void successfulRegistrationTest() {
 
+        String expectedUsername = testData.getRandomUsername();
+
         //работает в связке с конструктором (класс RegistrationBodyPojoModel
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(testData.username, testData.password);
+        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
+                testData.getRandomPassword());
 
         SuccessfulRegistrationResponseRecordsModel registrationResponse = given(registrationRequestSpec)
                 .config(timeoutConfig)
@@ -35,7 +38,7 @@ public class RegistrationTests extends TestBase {
         String actualUsername = registrationResponse.username();
         //проверки AssertJ
         // указываем сначала фактическое, потом ожидаемое значение username
-        assertThat(actualUsername).isEqualTo(testData.username);
+        assertThat(actualUsername).isEqualTo(expectedUsername);
         assertThat(registrationResponse.id()).isGreaterThan(0); // что >0
         assertThat(registrationResponse.firstName()).isEqualTo("");
         assertThat(registrationResponse.lastName()).isEqualTo("");
@@ -48,7 +51,11 @@ public class RegistrationTests extends TestBase {
     @DisplayName("Registration: дублирование при создании клиента - 400")
     @Test
     public void existingUserWrongRegistrationTest() {
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(testData.username, testData.password);
+
+        String expectedUsername = testData.getRandomUsername();
+
+        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
+                testData.getRandomPassword());
 
         SuccessfulRegistrationResponseRecordsModel firstRegistrationResponse = given(registrationRequestSpec)
                 .config(timeoutConfig)
@@ -59,8 +66,6 @@ public class RegistrationTests extends TestBase {
                 .spec(successfulRegistrationResponseSpec)
                 .extract()
                 .as(SuccessfulRegistrationResponseRecordsModel.class);
-
-        assertThat(firstRegistrationResponse.username()).isEqualTo(testData.username);
 
         RegistrationErrorResponseModel secondRegistrationResponse = given(registrationRequestSpec)
                 .config(timeoutConfig)
@@ -80,7 +85,7 @@ public class RegistrationTests extends TestBase {
     @Test
     public void exceedingMaxLengthUsernameRegistrationTest() {
         RegistrationBodyModel RegistrationData = new RegistrationBodyModel(testData.exceedingMaxLengthUsername,
-                testData.password);
+                testData.getRandomPassword());
         RegistrationErrorResponseModel secondRegistrationResponse = given(registrationRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)
@@ -99,7 +104,7 @@ public class RegistrationTests extends TestBase {
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
         RegistrationBodyModel RegistrationData =
-                new RegistrationBodyModel(testData.username, testData.exceedingMaxLengthPassword);
+                new RegistrationBodyModel(testData.getRandomUsername(), testData.exceedingMaxLengthPassword);
         RegistrationErrorResponseModel secondRegistrationResponse = given(registrationRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)

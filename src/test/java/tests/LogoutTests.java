@@ -24,7 +24,11 @@ public class LogoutTests extends TestBase {
     @Test
     public void successfulLogout() {
 
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(testData.username, testData.password);
+        String expectedUsername = testData.getRandomUsername();
+        String expectedPassword = testData.getRandomUsername();
+
+        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
+                expectedPassword);
         given(registrationRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)
@@ -33,7 +37,7 @@ public class LogoutTests extends TestBase {
                 .then()
                 .statusCode(201);
 
-        LoginBodyModel loginData = new LoginBodyModel(testData.username, testData.password);
+        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
         SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
@@ -54,7 +58,7 @@ public class LogoutTests extends TestBase {
                 .post("/auth/logout/")
                 .then()
                 .spec(successfulLogoutResponseSpec);
-}
+    }
 
     @DisplayName("Logout: невалидный токен. 401")
     @Test
@@ -71,22 +75,27 @@ public class LogoutTests extends TestBase {
                 .as(RepeatedLogoutResponseModel.class);
 
         assertThat(logoutResponse.detail()).isEqualTo(EXPECTED_ERROR_INVALID_TOKEN);
-          }
+    }
 
     @DisplayName("Logout: повторный logout. 401")
     @Test
     public void doubleLogout() {
+        String expectedUsername = testData.getRandomUsername();
+        String expectedPassword = testData.getRandomUsername();
 
-//        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(testData.username, testData.password);
-//        given(registrationRequestSpec)
-//                .config(timeoutConfig)
-//                .body(RegistrationData)
-//                .when()
-//                .post("/users/register/")
-//                .then()
-//                .statusCode(201);
 
-        LoginBodyModel loginData = new LoginBodyModel(testData.username, testData.password);
+        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(
+                expectedUsername,
+                expectedPassword);
+        given(registrationRequestSpec)
+                .config(timeoutConfig)
+                .body(RegistrationData)
+                .when()
+                .post("/users/register/")
+                .then()
+                .statusCode(201);
+
+        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
         SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
