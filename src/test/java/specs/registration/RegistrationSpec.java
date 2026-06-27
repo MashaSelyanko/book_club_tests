@@ -12,10 +12,10 @@ public class RegistrationSpec {
 
     public static RequestSpecification userRequestSpec = baseRequestSpec;
 
-   // спецификация для ответа для теста: 201 статус-код при получении токена
+    // спецификация для ответа для теста: 201 статус-код при получении токена
     public static ResponseSpecification successfulRegistrationResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(201)  // вместо .statusCode(201)
+            .log(ALL)                                     //вместо .log().all()
+            .expectStatusCode(201)      // вместо .statusCode(201)
             .expectBody(matchesJsonSchemaInClasspath(   //спец.метод, сравнивает со схемой
                     "schemas/registration/successful_registration_response_schema.json"))
             .expectBody("id", notNullValue())

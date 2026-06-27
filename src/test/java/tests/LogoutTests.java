@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.BDDAssumptions.given;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 import static specs.logout.LogoutSpec.*;
 import static specs.registration.RegistrationSpec.userRequestSpec;

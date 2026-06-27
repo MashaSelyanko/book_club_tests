@@ -1,6 +1,5 @@
 package tests.examples;
 
-import com.github.javafaker.Faker;
 import io.restassured.http.ContentType;
 import models.registration.model_examples.lombok.RegistrationBodyLombokModel;
 import models.registration.model_examples.lombok.RegistrationResponseLombokModel;
@@ -9,6 +8,7 @@ import models.registration.model_examples.pojo.RegistrationResponsePojoModel;
 import models.registration.model_examples.records.RegistrationBodyRecordsModel;
 import models.registration.model_examples.records.RegistrationErrorResponseRecordsModel;
 import models.registration.model_examples.records.RegistrationResponseRecordsModel;
+import net.datafaker.Faker;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +19,7 @@ import static org.hamcrest.Matchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@Disabled("Учебные примеры отключены, чтобы не спамить в отчет")
 public class RegistrationTests_with_model_examples {
     String username;
     String password;
@@ -32,7 +33,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("Позитивный тест на 201 статус-код")
     @Test
-    @Disabled
     public void successfulRegistrationTest() {
 
         //убрать в model
@@ -60,7 +60,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("Pojo_Позитивный тест на 201 статус-код")
     @Test
-    @Disabled
     public void successfulRegistrationTest_with_pojo() {
 
         RegistrationBodyPojoModel data = new RegistrationBodyPojoModel();
@@ -90,7 +89,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("Lombok_Позитивный тест на 201 статус-код")
     @Test
-    @Disabled
     public void successfulRegistrationTest_with_lombok() {
 
         RegistrationBodyLombokModel data = new RegistrationBodyLombokModel();
@@ -120,7 +118,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Позитивный тест на 201 статус-код")
     @Test
-    @Disabled
     public void successfulRegistrationTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -146,7 +143,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Негативная проверка 400 статус-код: передача username = \"\" ")
     @Test
-    @Disabled
     public void negativeRegistrationEmptyUsernameTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -170,7 +166,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Негативная проверка 400 статус-код: передача username = null ")
     @Test
-    @Disabled
     public void negativeRegistrationNullUsernameTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -194,7 +189,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Негативная проверка 400 статус-код: передача password = \"\" ")
     @Test
-    @Disabled
     public void negativeRegistrationEmptyPasswordTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -218,7 +212,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Негативная проверка 400 статус-код: передача password = null ")
     @Test
-    @Disabled
     public void negativeRegistrationNullPasswordTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -242,7 +235,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("record_Негативная проверка 400 статус-код: передача недопустимого значения в username")
     @Test
-    @Disabled
     public void negativeRegistrationInvalidUsernameTest_with_records() {
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel, строки 14-18)
@@ -267,7 +259,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("Негативный тест - дублирование запроса на создание клиента (400 статус-код)")
     @Test
-    @Disabled
     public void existingUser400Test() {
 
         RegistrationBodyRecordsModel data = new RegistrationBodyRecordsModel(username, password);
@@ -302,7 +293,6 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("Негативный тест на 500 статус-код")
     @Test
-    @Disabled
     public void negativeRegistration500Test() {
 
         io.restassured.response.Response response = given()
@@ -322,7 +312,6 @@ public class RegistrationTests_with_model_examples {
 
     //@DisplayName("Негативный тест на 400 статус-код") - отдает 502 Bad Gateway
     @Test
-    @Disabled
     public void negativeRegistration400Test() {
 
         String data = "{\"username\":\"" + username + "\"," +
@@ -348,20 +337,13 @@ public class RegistrationTests_with_model_examples {
 
     @DisplayName("bad_practice - Позитивный тест на 201 статус-код")
     @Test
-    @Disabled
     public void succeessfulRegistrationTest_bad_practice() {
 
         //убрать в model
         String data = "{\"username\":\"" + username + "\"," +
                 "\"password\": \"" + password + "\"}";
 
-//body {
-//        "username":"mariya",
-//        "password":"string"
-//    }
-//        https://book-club.qa.guru/api/v1/users/register/}
-
-        given()
+    given()
                 .log().all()
                 .contentType(ContentType.JSON)
                 .body(data)

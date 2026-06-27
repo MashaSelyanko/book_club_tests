@@ -6,11 +6,10 @@ import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
-import static org.assertj.core.api.Assertions.assertThat;
 import static specs.registration.RegistrationSpec.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class RegistrationTests extends TestBase {
     TestData testData = new TestData();

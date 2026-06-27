@@ -3,7 +3,6 @@ package models.registration;
 
 //нужно добавить Jackson
 
-
 import java.util.List;
 
 public record RegistrationErrorResponseModel(

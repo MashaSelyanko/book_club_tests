@@ -27,20 +27,56 @@ repositories {
 }
 
 dependencies {
-    testImplementation(platform("org.junit:junit-bom:5.10.0")) //обращаем внимание на bom
-    testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("io.rest-assured:rest-assured:6.0.0")
-    testImplementation("io.rest-assured:json-schema-validator:6.0.0")
-    implementation('com.github.javafaker:javafaker:1.0.2')
-    testImplementation("org.assertj:assertj-core:3.27.7")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.22.0")  //диссереализатор json
-    testImplementation("com.codeborne:selenide:7.15.0")
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation("com.opencsv:opencsv:5.12.0")
-    testImplementation("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.21.3")
-    testImplementation("io.qameta.allure:allure-selenide:2.34.0")
+    // Platform BOMs для управления версиями +
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation(platform("io.qameta.allure:allure-bom:2.34.0"))
+    testImplementation(platform("org.assertj:assertj-bom:3.27.6"))
+    testImplementation(platform("io.rest-assured:rest-assured-bom:6.0.0")) // Стабильная 5-я ветка
 
+    // Тестовые фреймворки +
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation("org.assertj:assertj-core")
+
+    // REST Assured и валидация схем +
+    testImplementation("io.rest-assured:rest-assured")
+    testImplementation("io.rest-assured:json-schema-validator")
+
+    // Работа с JSON (Jackson с полной поддержкой Java Records) +
+    testImplementation("tools.jackson.core:jackson-databind:3.1.0")
+
+    // Тест-данные (Faker)
+    testImplementation("net.datafaker:datafaker:2.5.4") //+
+
+    // UI (если нужен Selenide) и отчеты Allure
+    testImplementation("io.qameta.allure:allure-rest-assured") //+
+
+    // Вспомогательные библиотеки (CSV и логи)
+    testImplementation("org.slf4j:slf4j-simple:2.0.12") //+
+
+    //инфраструктурные зависимости - запуск тестов JUnit5 и сборщик шагов для Allure +
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testRuntimeOnly("org.aspectj:aspectjweaver:1.9.22")
 }
+
+
+//    testImplementation(platform("org.junit:junit-bom:5.10.0")) //обращаем внимание на bom
+//    testImplementation(platform("io.qameta.allure:allure-bom:2.34.0"))
+//    testImplementation("io.rest-assured:rest-assured")
+//    testImplementation("org.junit:junit-bom:5.10.2")
+//    testImplementation(platform("io.rest-assured:rest-assured-bom:6.0.0"))
+//    testImplementation("io.rest-assured:json-schema-validator:6.0.0")
+//    implementation('com.github.javafaker:javafaker:1.0.2')
+//    testImplementation("org.assertj:assertj-core:3.27.7")
+//    implementation("com.fasterxml.jackson.core:jackson-databind:3.1.0")  //диссереализатор json
+//    testImplementation("com.codeborne:selenide:7.15.0")
+//    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+//    testImplementation("com.opencsv:opencsv:5.12.0")
+//    testImplementation("com.fasterxml.jackson.jaxrs:jackson-jaxrs-json-provider:2.21.3")
+//    testImplementation("org.slf4j:slf4j-simple:2.0.17")
+//    testImplementation("io.qameta.allure:allure-selenide:2.34.0")
+
+
 
 tasks.withType(Test) {
     useJUnitPlatform()

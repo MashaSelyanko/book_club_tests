@@ -25,24 +25,24 @@ public class LoginSpec {
 
     //спецификация для ответа для теста: 401 статус-код (некорректный password)
     public static ResponseSpecification wrongPasswordLoginResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(401)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(401)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/login/wrong_credentials_login_response_schema.json"))
             .expectBody("detail", notNullValue())
             .build();
 
-//спецификация для ответа для теста: 401 статус-код (некорректный username)
+    //спецификация для ответа для теста: 401 статус-код (некорректный username)
 
-public static ResponseSpecification wrongUsernameLoginResponseSpec = new ResponseSpecBuilder()
-        .log(ALL)                                 //вместо .log().all()
-        .expectStatusCode(401)  // вместо .statusCode(200)
-        .expectBody(matchesJsonSchemaInClasspath(
-                "schemas/login/wrong_credentials_login_response_schema.json"))
-        .expectBody("detail", notNullValue())
-        .build();
+    public static ResponseSpecification wrongUsernameLoginResponseSpec = new ResponseSpecBuilder()
+            .log(ALL)
+            .expectStatusCode(401)
+            .expectBody(matchesJsonSchemaInClasspath(
+                    "schemas/login/wrong_credentials_login_response_schema.json"))
+            .expectBody("detail", notNullValue())
+            .build();
 
-//спецификация для ответа для теста: 400 статус-код (пустой username)
+    //спецификация для ответа для теста: 400 статус-код (пустой username)
 
     public static ResponseSpecification emptyUsernameLoginResponseSpec = new ResponseSpecBuilder()
             .log(ALL)
@@ -52,11 +52,11 @@ public static ResponseSpecification wrongUsernameLoginResponseSpec = new Respons
             .expectBody("username", notNullValue())
             .build();
 
-//спецификация для ответа для теста: 400 статус-код (пустой password)
+    //спецификация для ответа для теста: 400 статус-код (пустой password)
 
     public static ResponseSpecification emptyPasswordLoginResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/login/empty_password_response_schema.json"))
             .expectBody("password", notNullValue())
@@ -65,8 +65,8 @@ public static ResponseSpecification wrongUsernameLoginResponseSpec = new Respons
     //спецификация для ответа для теста: 400 статус-код (username = null)
 
     public static ResponseSpecification nullUsernameLoginResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/login/empty_login_response_schema.json"))
             .expectBody("username", notNullValue())
@@ -75,8 +75,8 @@ public static ResponseSpecification wrongUsernameLoginResponseSpec = new Respons
     //спецификация для ответа для теста: 400 статус-код (username = null)
 
     public static ResponseSpecification emptyJSONLoginResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .build();
 }
 
