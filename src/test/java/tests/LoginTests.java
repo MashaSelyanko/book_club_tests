@@ -11,7 +11,9 @@ import models.registration.RegistrationBodyModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import java.util.List;
+
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -63,13 +65,17 @@ public class LoginTests extends TestBase {
         String actualAccess = loginResponse.access();
         String actualRefresh = loginResponse.refresh();
 
-        //добавляем библиотеку assertj для проверок
-        //проверяем, что пришел токен, который содержит ожидаемое значение
-        assertThat(actualAccess).startsWith(expectedTokenPath);
-        assertThat(actualRefresh).startsWith(expectedTokenPath);
-        // проверяем, что Access != Refresh
-        assertThat(actualAccess).isNotEqualTo(actualRefresh);
+        assertThat(actualAccess)
+                .as("Проверка, что access-токен начинается с ожидаемых символов")
+                .startsWith(expectedTokenPath);
 
+        assertThat(actualRefresh)
+                .as("Проверка, что refresh-токен начинается с ожидаемых символов")
+                .startsWith(expectedTokenPath);
+
+        assertThat(actualAccess)
+                .as("Проверка, что access-токен отличается от refresh-токена")
+                .isNotEqualTo(actualRefresh);
     }
 
     @DisplayName("Негативный тест- некорректный password: 401 статус-код ")
@@ -91,8 +97,6 @@ public class LoginTests extends TestBase {
         //фактическое значение забираем
         String actualDetailErrorAccess = loginResponse.detail();
 
-        //добавляем библиотеку assertj для проверок
-        // проверяем текст сообщения об ошибке
         assertThat(actualDetailErrorAccess).isEqualTo(EXPECTED_ERROR_WRONG_PASSWORD);
     }
 
@@ -112,11 +116,8 @@ public class LoginTests extends TestBase {
                 .extract()
                 .as(DetailErrorResponseModel.class);
 
-        //фактическое значение забираем
         String actualDetailError = loginResponse.detail();
 
-        //добавляем библиотеку assertj для проверок
-        // проверяем текст сообщения об ошибке
         assertThat(actualDetailError).isEqualTo(EXPECTED_ERROR_WRONG_USERNAME);
     }
 
@@ -159,10 +160,8 @@ public class LoginTests extends TestBase {
                 .extract()
                 .as(EmptyCredentialsLoginResponseModel.class);
 
-        //получаем список ошибок
         List<String> actualPasswordError = loginResponse.password();
 
-        //проверяем фактический список ошибок на наличие той, что в ожидаемом результате
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_EMPTY_FIELD);
     }
 
@@ -182,10 +181,8 @@ public class LoginTests extends TestBase {
                 .extract()
                 .as(EmptyCredentialsLoginResponseModel.class);
 
-        //получаем список ошибок
         List<String> actualPasswordError = loginResponse.username();
 
-        //проверяем фактический список ошибок на наличие той, что в ожидаемом результате
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_NULL_FIELD);
     }
 
@@ -205,11 +202,9 @@ public class LoginTests extends TestBase {
                 .extract()
                 .as(EmptyCredentialsLoginResponseModel.class);
 
-        //получаем список ошибок
         List<String> actualResponseError = loginResponse.username();
         List<String> actualPasswordError = loginResponse.password();
 
-        //проверяем фактический список ошибок на наличие ожидаемого текста через AssertJ
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_NULL_FIELD);
         assertThat(actualResponseError).contains(EXPECTED_ERROR_NULL_FIELD);
     }

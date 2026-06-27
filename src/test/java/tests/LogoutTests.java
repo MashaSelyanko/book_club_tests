@@ -81,7 +81,6 @@ public class LogoutTests extends TestBase {
         String expectedUsername = testData.getRandomUsername();
         String expectedPassword = testData.getRandomPassword();
 
-
         RegistrationBodyModel RegistrationData = new RegistrationBodyModel(
                 expectedUsername,
                 expectedPassword);

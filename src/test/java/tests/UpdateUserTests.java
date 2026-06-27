@@ -12,6 +12,7 @@ import models.updateUser.UpdateUserResponseInvalidEmailModel;
 import models.updateUser.UpdateUserResponseModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,9 +22,6 @@ import static specs.registration.RegistrationSpec.successfulRegistrationResponse
 import static specs.registration.RegistrationSpec.userRequestSpec;
 
 public class UpdateUserTests extends TestBase {
-
-    TestData testData = new TestData();
-
 
     @DisplayName("Позитивный тест - обновление пользователя методом PUT: 200 статус-код")
     @Test
@@ -61,7 +59,7 @@ public class UpdateUserTests extends TestBase {
         String accessToken = loginResponse.access();
 
         // подготовка ожидаемых данных
-        String expectedFirstName =getRandomFirstName();
+        String expectedFirstName = getRandomFirstName();
         String expectedLastName = getRandomLastName();
         String expectedEmail = getRandomEmail();
 
@@ -70,10 +68,9 @@ public class UpdateUserTests extends TestBase {
                 expectedFirstName,
                 expectedLastName,
                 expectedEmail
-                );
+        );
 
         UpdateUserResponseModel updateUserResponse = given(updateUserRequestSpec)
-                //.config(timeoutConfig)
                 .header("Authorization", "Bearer " + accessToken)
                 .body(updateUser)
                 .when()
@@ -107,21 +104,18 @@ public class UpdateUserTests extends TestBase {
                 .as("Проверка обновленного email")
                 .isEqualTo(expectedEmail);
 
-        //проверка, что поле ip-адреса не пустое
-        assertThat(updateUserResponse.remoteAddr()).isNotBlank();
-
-        //проверка на формат полученного ip
-        assertThat(updateUserResponse.remoteAddr()).matches(IP_ADDRESS_REGEXP);
+        assertThat(updateUserResponse.remoteAddr())
+                .as("Проверка формата полученного ip-адреса")
+                .matches(IP_ADDRESS_REGEXP);
     }
 
-    @DisplayName("Позитивнй тест - полное обновление пользователя методом PATCH: 200 статус-код")
+    @DisplayName("Позитивный тест - полное обновление пользователя методом PATCH: 200 статус-код")
     @Test
     public void successfulUpdateUserWithPatchTest() {
 
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-        //работает в связке с конструктором (класс RegistrationBodyPojoModel
         RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
                 expectedPassword);
 
@@ -149,8 +143,7 @@ public class UpdateUserTests extends TestBase {
 
         String accessToken = loginResponse.access();
 
-        // подготовка ожидаемых данных
-        String expectedFirstName =getRandomFirstName();
+        String expectedFirstName = getRandomFirstName();
         String expectedLastName = getRandomLastName();
         String expectedEmail = getRandomEmail();
 
@@ -162,7 +155,6 @@ public class UpdateUserTests extends TestBase {
         );
 
         UpdateUserResponseModel updateUserResponse = given(updateUserRequestSpec)
-                //.config(timeoutConfig)
                 .header("Authorization", "Bearer " + accessToken)
                 .body(updateUser)
                 .when()
@@ -172,10 +164,8 @@ public class UpdateUserTests extends TestBase {
                 .extract()
                 .as(UpdateUserResponseModel.class);
 
-        //Assert
         String actualUsername = updateUserResponse.username();
-        //проверки AssertJ
-        // указываем сначала фактическое, потом ожидаемое значение username
+
         assertThat(actualUsername)
                 .as("Проверка обновленного username")
                 .isEqualTo(expectedUsername);
@@ -196,11 +186,9 @@ public class UpdateUserTests extends TestBase {
                 .as("Проверка обновленного email")
                 .isEqualTo(expectedEmail);
 
-        //проверка, что поле ip-адреса не пустое
-        assertThat(updateUserResponse.remoteAddr()).isNotBlank();
-
-        //проверка на формат полученного ip
-        assertThat(updateUserResponse.remoteAddr()).matches(IP_ADDRESS_REGEXP);
+        assertThat(updateUserResponse.remoteAddr())
+                .as("Проверка формата полученного ip-адреса")
+                .matches(IP_ADDRESS_REGEXP);
     }
 
     @DisplayName("Позитивный тест - частичное обновление пользователя методом PATCH: 200 статус-код")
@@ -210,7 +198,6 @@ public class UpdateUserTests extends TestBase {
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-        //работает в связке с конструктором (класс RegistrationBodyPojoModel
         RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
                 expectedPassword);
 
@@ -238,8 +225,7 @@ public class UpdateUserTests extends TestBase {
 
         String accessToken = loginResponse.access();
 
-        // подготовка ожидаемых данных
-               String expectedEmail = getRandomEmail();
+        String expectedEmail = getRandomEmail();
 
         PartialUpdateUserWitchPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWitchPatchBodyModel(
                 expectedUsername,
@@ -257,7 +243,6 @@ public class UpdateUserTests extends TestBase {
                 .extract()
                 .as(UpdateUserResponseModel.class);
 
-        //Assert
         String actualUsername = partialUpdateUserWitchPatch.username();
 
         assertThat(actualUsername)
@@ -280,7 +265,6 @@ public class UpdateUserTests extends TestBase {
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-        //работает в связке с конструктором (класс RegistrationBodyPojoModel
         RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
                 expectedPassword);
 
@@ -308,7 +292,6 @@ public class UpdateUserTests extends TestBase {
 
         String accessToken = loginResponse.access();
 
-        // подготовка ожидаемых данных
         String expectedEmail = TestData.WRONG_EMAIL;
 
         PartialUpdateUserWitchPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWitchPatchBodyModel(
@@ -333,7 +316,6 @@ public class UpdateUserTests extends TestBase {
     @Test
     public void unauthorizedUpdateUserWithPatchTest() {
 
-        // подготовка ожидаемых данных
         String expectedUsername = getRandomUsername();
         String expectedEmail = getRandomEmail();
 
@@ -360,9 +342,8 @@ public class UpdateUserTests extends TestBase {
     @Test
     public void unauthorizedUpdateUserWithPutTest() {
 
-        // подготовка ожидаемых данных
         String expectedUsername = getRandomUsername();
-        String expectedFirstName =getRandomFirstName();
+        String expectedFirstName = getRandomFirstName();
         String expectedLastName = getRandomLastName();
         String expectedEmail = getRandomEmail();
 
