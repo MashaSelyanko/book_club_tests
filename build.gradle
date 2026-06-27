@@ -11,12 +11,12 @@ version = "1.0-SNAPSHOT"
 
 def slf4jVersion = "2.0.17"
 allure {
-    version.set("2.29.0")
+    version.set("2.25.0")
     adapter {                                   // отвечает за появление папки build/allure-results
         aspectjWeaver.set(true)                 //обработка аннотации @Step
         frameworks {
             junit5 {                            //фреймворк
-                adapterVersion.set("2.19.0")    //версия интеграции фреймворка и Allure
+                adapterVersion.set("2.25.0")    //версия интеграции фреймворка и Allure
             }
         }
     }
@@ -28,34 +28,33 @@ repositories {
 
 dependencies {
     // Platform BOMs для управления версиями +
-    testImplementation(platform("org.junit:junit-bom:5.10.0"))
-    testImplementation(platform("io.qameta.allure:allure-bom:2.34.0"))
+    testImplementation(platform("org.junit:junit-bom:5.10.2"))
+    testImplementation(platform("io.qameta.allure:allure-bom:2.25.0"))
     testImplementation(platform("org.assertj:assertj-bom:3.27.6"))
     testImplementation(platform("io.rest-assured:rest-assured-bom:6.0.0")) // Стабильная 5-я ветка
 
     // Тестовые фреймворки +
-    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("org.junit.jupiter:junit-jupiter") //не указываем версию, чтобы она подтянулась из bom (cтр.31)
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation("org.assertj:assertj-core")
 
     // REST Assured и валидация схем +
     testImplementation("io.rest-assured:rest-assured")
-    testImplementation("io.rest-assured:json-schema-validator")
+    testImplementation("io.rest-assured:json-schema-validator:6.0.0")
 
     // Работа с JSON (Jackson с полной поддержкой Java Records) +
-    testImplementation("tools.jackson.core:jackson-databind:3.1.0")
+    testImplementation("tools.jackson.core:jackson-databind:3.1.4")
 
     // Тест-данные (Faker)
     testImplementation("net.datafaker:datafaker:2.5.4") //+
 
     // UI (если нужен Selenide) и отчеты Allure
-    testImplementation("io.qameta.allure:allure-rest-assured") //+
+    testImplementation("io.qameta.allure:allure-rest-assured:2.34.0") //+
 
     // Вспомогательные библиотеки (CSV и логи)
     testImplementation("org.slf4j:slf4j-simple:2.0.12") //+
 
-    //инфраструктурные зависимости - запуск тестов JUnit5 и сборщик шагов для Allure +
-    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    //инфраструктурные зависимости - сборщик шагов для Allure +
     testRuntimeOnly("org.aspectj:aspectjweaver:1.9.22")
 }
 

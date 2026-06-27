@@ -7,6 +7,7 @@ import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static TestData.TestData.*;
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static specs.registration.RegistrationSpec.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,6 +22,7 @@ public class RegistrationTests extends TestBase {
         String expectedUsername = testData.getRandomUsername();
         String expectedPassword = testData.getRandomPassword();
 
+        step("Проверка успешной регистрации пользователя", () -> {
         //работает в связке с конструктором (класс RegistrationBodyPojoModel
         RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
                 expectedPassword);
@@ -57,6 +59,7 @@ public class RegistrationTests extends TestBase {
         assertThat(registrationResponse.remoteAddr())
                 .as("Проверка формата полученного ip-адреса")
                 .matches(IP_ADDRESS_REGEXP);
+        });
     }
 
     @DisplayName("Негативный тест - дублирование при создании клиента: 400 статус-код")
