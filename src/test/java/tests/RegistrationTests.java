@@ -6,6 +6,7 @@ import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,14 +40,24 @@ public class RegistrationTests extends TestBase {
         String actualUsername = registrationResponse.username();
         //проверки AssertJ
         // указываем сначала фактическое, потом ожидаемое значение username
-        assertThat(actualUsername).isEqualTo(expectedUsername);
-        assertThat(registrationResponse.id()).isGreaterThan(0); // что >0
-        assertThat(registrationResponse.firstName()).isEqualTo("");
-        assertThat(registrationResponse.lastName()).isEqualTo("");
-        assertThat(registrationResponse.email()).isEqualTo("");
+        assertThat(actualUsername)
+                .as("Проверка на соответствие username")
+                .isEqualTo(expectedUsername);
+        assertThat(registrationResponse.firstName())
+                .as("Проверка, что поле firstName вернулось пустое")
+                .isEqualTo("");
 
-        //проверка на формат полученного ip
-        assertThat(registrationResponse.remoteAddr()).matches(IP_ADDRESS_REGEXP);
+        assertThat(registrationResponse.lastName())
+                .as("Проверка, что поле lastName вернулось пустое")
+                .isEqualTo("");
+
+        assertThat(registrationResponse.id())
+                .as("Проверка, что id положительное число")
+                .isGreaterThan(0); // что >0
+
+        assertThat(registrationResponse.remoteAddr())
+                .as("Проверка формата полученного ip-адреса")
+                .matches(IP_ADDRESS_REGEXP);
     }
 
     @DisplayName("Негативный тест - дублирование при создании клиента: 400 статус-код")

@@ -268,11 +268,9 @@ public class UpdateUserTests extends TestBase {
                 .as("Проверка обновленного email")
                 .isEqualTo(expectedEmail);
 
-        //проверка, что поле ip-адреса не пустое
-        assertThat(partialUpdateUserResponse.remoteAddr()).isNotBlank();
-
-        //проверка на формат полученного ip
-        assertThat(partialUpdateUserResponse.remoteAddr()).matches(IP_ADDRESS_REGEXP);
+        assertThat(partialUpdateUserResponse.remoteAddr())
+                .as("Проверка формата полученного ip-адреса")
+                .matches(IP_ADDRESS_REGEXP);
     }
 
     @DisplayName("Негативный тест - частичное обновление пользователя методом PATCH: 400 статус-код")
