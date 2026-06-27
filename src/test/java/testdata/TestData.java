@@ -1,4 +1,4 @@
-package TestData;
+package testdata;
 
 import com.github.javafaker.Faker;
 
@@ -30,13 +30,13 @@ public class TestData {
         return faker.internet().emailAddress();
     }
 
-       // невалидные данные для негативных тестов
+    // невалидные данные для негативных тестов
     public static final String
             WRONG_PASSWORD = "gaguru12",
             WRONG_USERNAME = "gaguru000",
             WRONG_EMAIL = "www@.ru",
 
-            EMPTY_VALUE = "",
+    EMPTY_VALUE = "",
             NULL_VALUE = null,
             INVALID_TOKEN = faker.lorem().characters(16, 32,
                     true, true);
@@ -56,7 +56,6 @@ public class TestData {
             EXPECTED_ERROR_TOKEN_IS_BLACKLISTED = "Token is blacklisted",
             EXPECTED_TOKEN_NOT_VALID_CODE = "token_not_valid",
             EXPECTED_UNAUTHORIZED_ERROR = "Authentication credentials were not provided.";
-
 
 
 }

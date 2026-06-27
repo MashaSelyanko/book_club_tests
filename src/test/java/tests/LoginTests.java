@@ -2,7 +2,7 @@
 
 package tests;
 
-import TestData.TestData;
+import testdata.TestData;
 import models.login.EmptyCredentialsLoginResponseModel;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
@@ -11,10 +11,8 @@ import models.registration.RegistrationBodyModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
-
-import static TestData.TestData.*;
+import static testdata.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static specs.login.LoginSpec.*;
@@ -48,7 +46,7 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
-        SuccessfulLoginResponseModel loginResponse = given(userRequestSpec)
+        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -84,7 +82,7 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.WRONG_PASSWORD);
 
-        DetailErrorResponseModel loginResponse = given(userRequestSpec)
+        DetailErrorResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -106,7 +104,7 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
 
-        DetailErrorResponseModel loginResponse = given(userRequestSpec)
+        DetailErrorResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -127,7 +125,7 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.getRandomPassword());
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -150,7 +148,7 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()

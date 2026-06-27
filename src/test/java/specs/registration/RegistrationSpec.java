@@ -3,6 +3,7 @@ package specs.registration;
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
 import io.restassured.specification.ResponseSpecification;
+
 import static io.restassured.filter.log.LogDetail.ALL;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.notNullValue;
@@ -12,7 +13,7 @@ public class RegistrationSpec {
 
     public static RequestSpecification userRequestSpec = baseRequestSpec;
 
-   // спецификация для ответа для теста: 201 статус-код при получении токена
+    // спецификация для ответа для теста: 201 статус-код при получении токена
     public static ResponseSpecification successfulRegistrationResponseSpec = new ResponseSpecBuilder()
             .log(ALL)                                 //вместо .log().all()
             .expectStatusCode(201)  // вместо .statusCode(201)
@@ -49,7 +50,6 @@ public class RegistrationSpec {
                     "schemas/registration/password_length_error_registration_response_schema.json"))
             .expectBody("password", notNullValue())
             .build();
-
 }
 
 

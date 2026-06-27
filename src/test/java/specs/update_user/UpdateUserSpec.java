@@ -1,4 +1,4 @@
-package specs.UpdateUser;
+package specs.update_user;
 
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;
@@ -12,7 +12,7 @@ public class UpdateUserSpec {
 
     public static RequestSpecification updateUserRequestSpec = baseRequestSpec;
 
-   // спецификация для ответа для теста: 200 статус-код (update клиента)
+    // спецификация для ответа для теста: 200 статус-код (update клиента)
     public static ResponseSpecification updateUserResponseSpec = new ResponseSpecBuilder()
             .log(ALL)
             .expectStatusCode(200)

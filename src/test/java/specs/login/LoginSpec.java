@@ -10,8 +10,7 @@ import static specs.BaseSpec.baseRequestSpec;
 
 public class LoginSpec {
 
-    public static RequestSpecification userRequestSpec = baseRequestSpec;
-
+    public static RequestSpecification loginRequestSpec = baseRequestSpec;
 
     //спецификация для ответа для теста: 200 статус-код при получении токена
     public static ResponseSpecification successfulLoginResponseSpec = new ResponseSpecBuilder()
@@ -34,13 +33,13 @@ public class LoginSpec {
 
 //спецификация для ответа для теста: 401 статус-код (некорректный username)
 
-public static ResponseSpecification wrongUsernameLoginResponseSpec = new ResponseSpecBuilder()
-        .log(ALL)                                 //вместо .log().all()
-        .expectStatusCode(401)  // вместо .statusCode(200)
-        .expectBody(matchesJsonSchemaInClasspath(
-                "schemas/login/wrong_credentials_login_response_schema.json"))
-        .expectBody("detail", notNullValue())
-        .build();
+    public static ResponseSpecification wrongUsernameLoginResponseSpec = new ResponseSpecBuilder()
+            .log(ALL)                                 //вместо .log().all()
+            .expectStatusCode(401)  // вместо .statusCode(200)
+            .expectBody(matchesJsonSchemaInClasspath(
+                    "schemas/login/wrong_credentials_login_response_schema.json"))
+            .expectBody("detail", notNullValue())
+            .build();
 
 //спецификация для ответа для теста: 400 статус-код (пустой username)
 

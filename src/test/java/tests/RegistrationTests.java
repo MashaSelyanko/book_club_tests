@@ -1,13 +1,12 @@
 package tests;
 
-import TestData.TestData;
+import testdata.TestData;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
-import static TestData.TestData.*;
+import static testdata.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static specs.registration.RegistrationSpec.*;
@@ -23,12 +22,10 @@ public class RegistrationTests extends TestBase {
         String expectedPassword = testData.getRandomPassword();
 
         //работает в связке с конструктором (класс RegistrationBodyPojoModel
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername, expectedPassword);
 
         SuccessfulRegistrationResponseRecordsModel registrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
+                .config(timeoutConfig).body(registrationData)
                 .when()
                 .post("users/register/")
                 .then()
@@ -43,19 +40,24 @@ public class RegistrationTests extends TestBase {
         assertThat(actualUsername)
                 .as("Проверка на соответствие username")
                 .isEqualTo(expectedUsername);
-        assertThat(registrationResponse.firstName())
+
+        assertThat(registrationResponse
+                .firstName())
                 .as("Проверка, что поле firstName вернулось пустое")
                 .isEqualTo("");
 
-        assertThat(registrationResponse.lastName())
+        assertThat(registrationResponse
+                .lastName())
                 .as("Проверка, что поле lastName вернулось пустое")
                 .isEqualTo("");
 
-        assertThat(registrationResponse.id())
+        assertThat(registrationResponse
+                .id())
                 .as("Проверка, что id положительное число")
                 .isGreaterThan(0); // что >0
 
-        assertThat(registrationResponse.remoteAddr())
+        assertThat(registrationResponse
+                .remoteAddr())
                 .as("Проверка формата полученного ip-адреса")
                 .matches(IP_ADDRESS_REGEXP);
     }
@@ -67,10 +69,10 @@ public class RegistrationTests extends TestBase {
         String expectedUsername = testData.getRandomUsername();
         String expectedPassword = testData.getRandomPassword();
 
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
+                (expectedUsername, expectedPassword);
 
-        SuccessfulRegistrationResponseRecordsModel firstRegistrationResponse = given(userRequestSpec)
+        given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(registrationData)
                 .when()
@@ -90,15 +92,18 @@ public class RegistrationTests extends TestBase {
                 .extract()
                 .as(RegistrationErrorResponseModel.class);
 
-        String actualError = secondRegistrationResponse.username().getFirst();
-        assertThat(actualError).isEqualTo(EXPECTED_ERROR_DUPLICATE_USERNAME_ERROR);
+        String actualError = secondRegistrationResponse
+                .username()
+                .getFirst();
+        assertThat(actualError)
+                .isEqualTo(EXPECTED_ERROR_DUPLICATE_USERNAME_ERROR);
     }
 
     @DisplayName("Негативный тест -регистрация пользователя с username более 150 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthUsernameRegistrationTest() {
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(testData.exceedingMaxLengthUsername,
-                testData.getRandomPassword());
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
+                (testData.exceedingMaxLengthUsername, testData.getRandomPassword());
         RegistrationErrorResponseModel secondRegistrationResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(registrationData)
@@ -109,15 +114,18 @@ public class RegistrationTests extends TestBase {
                 .extract()
                 .as(RegistrationErrorResponseModel.class);
 
-        String actualError = secondRegistrationResponse.username().getFirst();
-        assertThat(actualError).isEqualTo(EXPECTED_ERROR_EXCEEDED_USERNAME_MAX_LENGTH);
+        String actualError = secondRegistrationResponse
+                .username()
+                .getFirst();
+        assertThat(actualError)
+                .isEqualTo(EXPECTED_ERROR_EXCEEDED_USERNAME_MAX_LENGTH);
     }
 
     @DisplayName("Негативный тест -регистрация пользователя с password более 128 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
-        RegistrationBodyModel registrationData =
-                new RegistrationBodyModel(testData.getRandomUsername(), testData.exceedingMaxLengthPassword);
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
+                (testData.getRandomUsername(), testData.exceedingMaxLengthPassword);
         RegistrationErrorResponseModel secondRegistrationResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(registrationData)

@@ -1,6 +1,6 @@
 package tests;
 
-import TestData.TestData;
+import testdata.TestData;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import models.logout.LogoutBodyModel;
@@ -8,7 +8,8 @@ import models.logout.RepeatedLogoutResponseModel;
 import models.registration.RegistrationBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static TestData.TestData.*;
+
+import static testdata.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
@@ -26,8 +27,8 @@ public class LogoutTests extends TestBase {
         String expectedUsername = testData.getRandomUsername();
         String expectedPassword = testData.getRandomPassword();
 
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        RegistrationBodyModel RegistrationData = new RegistrationBodyModel
+                (expectedUsername, expectedPassword);
         given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)

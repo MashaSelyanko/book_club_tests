@@ -5,4 +5,5 @@ package models.login;
 import java.util.List;
 
 //этот подход, когда много разных параметров передается
-public record EmptyCredentialsLoginResponseModel(List<String> password, List<String> username) {}
+public record EmptyCredentialsLoginResponseModel
+        (List<String> password, List<String> username) {}
