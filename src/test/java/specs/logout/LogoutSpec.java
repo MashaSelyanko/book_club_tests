@@ -8,14 +8,13 @@ import static io.restassured.RestAssured.with;
 import static io.restassured.filter.log.LogDetail.ALL;
 import static io.restassured.module.jsv.JsonSchemaValidator.matchesJsonSchemaInClasspath;
 import static org.hamcrest.Matchers.notNullValue;
+import static specs.BaseSpec.baseRequestSpec;
 
 public class LogoutSpec {
 
     // спецификация для запроса
-    public static RequestSpecification logoutRequestSpec = with()
-            .log().all()
-            .contentType(ContentType.JSON)
-            .basePath("/api/v1"); //для проверки версионности отдельно указываем
+    public static RequestSpecification logoutRequestSpec = baseRequestSpec;
+
 
     //спецификация для 200 статус-кода (успешный logout)
     public static ResponseSpecification successfulLogoutResponseSpec = new ResponseSpecBuilder()

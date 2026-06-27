@@ -11,34 +11,32 @@ import org.junit.jupiter.api.Test;
 import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.login.LoginSpec.loginRequestSpec;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 import static specs.logout.LogoutSpec.*;
-import static specs.registration.RegistrationSpec.registrationRequestSpec;
+import static specs.registration.RegistrationSpec.userRequestSpec;
 
 public class LogoutTests extends TestBase {
 
     TestData testData = new TestData();
 
-    @DisplayName("Logout: 200")
+    @DisplayName("Позитивный тест на logout: 200 статус-код")
     @Test
     public void successfulLogout() {
 
         String expectedUsername = testData.getRandomUsername();
-        String expectedPassword = testData.getRandomUsername();
+        String expectedPassword = testData.getRandomPassword();
 
         RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
                 expectedPassword);
-        given(registrationRequestSpec)
+        given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)
                 .when()
                 .post("/users/register/")
-                .then()
-                .statusCode(201);
+                .then();
 
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
+        SuccessfulLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -60,7 +58,7 @@ public class LogoutTests extends TestBase {
                 .spec(successfulLogoutResponseSpec);
     }
 
-    @DisplayName("Logout: невалидный токен. 401")
+    @DisplayName("Негативный тест на logout - невалидный токен: 401 статус-код")
     @Test
     public void invalidTokenLogout() {
         LogoutBodyModel logoutData = new LogoutBodyModel(testData.INVALID_TOKEN);
@@ -77,26 +75,25 @@ public class LogoutTests extends TestBase {
         assertThat(logoutResponse.detail()).isEqualTo(EXPECTED_ERROR_INVALID_TOKEN);
     }
 
-    @DisplayName("Logout: повторный logout. 401")
+    @DisplayName("Негативный тест - повторный logout: 401 статус-код")
     @Test
     public void doubleLogout() {
         String expectedUsername = testData.getRandomUsername();
-        String expectedPassword = testData.getRandomUsername();
+        String expectedPassword = testData.getRandomPassword();
 
 
         RegistrationBodyModel RegistrationData = new RegistrationBodyModel(
                 expectedUsername,
                 expectedPassword);
-        given(registrationRequestSpec)
+        given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(RegistrationData)
                 .when()
                 .post("/users/register/")
-                .then()
-                .statusCode(201);
+                .then();
 
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
+        SuccessfulLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()

@@ -10,9 +10,9 @@ import static specs.BaseSpec.baseRequestSpec;
 
 public class RegistrationSpec {
 
-    public static RequestSpecification registrationRequestSpec = baseRequestSpec;
+    public static RequestSpecification userRequestSpec = baseRequestSpec;
 
-   // спецификация для ответа для теста: 200 статус-код при получении токена
+   // спецификация для ответа для теста: 201 статус-код при получении токена
     public static ResponseSpecification successfulRegistrationResponseSpec = new ResponseSpecBuilder()
             .log(ALL)                                 //вместо .log().all()
             .expectStatusCode(201)  // вместо .statusCode(201)
@@ -23,31 +23,28 @@ public class RegistrationSpec {
             .expectBody("remoteAddr", notNullValue())
             .build();
 
-
-    //    спецификация для ответа для теста: 400 статус-код (дублирование при создании клиента)
+    // спецификация для ответа для теста: 400 статус-код (дублирование при создании клиента)
     public static ResponseSpecification wrongRegistrationResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/registration/existing_user_registration_response_schema.json"))
             .expectBody("username", notNullValue())
             .build();
 
-// спецификация для ответа для теста: 401 статус-код (username более 150 символов)
-
+    // спецификация для ответа для теста: 400 статус-код (username более 150 символов)
     public static ResponseSpecification exceedingMaxLengthUsernameRegistrationResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/registration/username_length_error_registration_response_schema.json"))
             .expectBody("username", notNullValue())
             .build();
 
-    //спецификация для ответа для теста: 400 статус-код (password более 128 символов)
-
+    // спецификация для ответа для теста: 400 статус-код (password более 128 символов)
     public static ResponseSpecification exceedingMaxLengthPasswordRegistrationResponseSpec = new ResponseSpecBuilder()
-            .log(ALL)                                 //вместо .log().all()
-            .expectStatusCode(400)  // вместо .statusCode(200)
+            .log(ALL)
+            .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
                     "schemas/registration/password_length_error_registration_response_schema.json"))
             .expectBody("password", notNullValue())

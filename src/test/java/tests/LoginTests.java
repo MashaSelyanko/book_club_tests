@@ -6,7 +6,9 @@ import TestData.TestData;
 import models.login.EmptyCredentialsLoginResponseModel;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
-import models.login.WrongCredentialsLoginResponseModel;
+import models.DetailErrorResponseModel;
+import models.registration.RegistrationBodyModel;
+import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.List;
@@ -14,18 +16,37 @@ import static TestData.TestData.*;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static specs.login.LoginSpec.*;
+import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
+import static specs.registration.RegistrationSpec.userRequestSpec;
 
 public class LoginTests extends TestBase {
 
     TestData testData = new TestData();
 
-    @DisplayName("Позитивный тест - 200 статус-код - получение токена")
+    @DisplayName("Позитивный тест - получение токена: 200 статус-код ")
     @Test
     public void successfulLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.VALID_USERNAME, TestData.VALID_PASSWORD);
+        String expectedUsername = testData.getRandomUsername();
+        String expectedPassword = testData.getRandomPassword();
 
-        SuccessfulLoginResponseModel loginResponse = given(loginRequestSpec)
+        //работает в связке с конструктором (класс RegistrationBodyPojoModel
+        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
+                expectedPassword);
+
+        given(userRequestSpec)
+                .config(timeoutConfig)
+                .body(registrationData)
+                .when()
+                .post("users/register/")
+                .then()
+                .spec(successfulRegistrationResponseSpec)
+                .extract()
+                .as(SuccessfulRegistrationResponseRecordsModel.class);
+
+        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
+
+        SuccessfulLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -51,13 +72,13 @@ public class LoginTests extends TestBase {
 
     }
 
-    @DisplayName("Негативный тест - 401 статус-код - некорректный password")
+    @DisplayName("Негативный тест- некорректный password: 401 статус-код ")
     @Test
     public void wrongPasswordLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(testData.VALID_USERNAME, TestData.WRONG_PASSWORD);
+        LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.WRONG_PASSWORD);
 
-        WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        DetailErrorResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -65,7 +86,7 @@ public class LoginTests extends TestBase {
                 .then()
                 .spec(wrongPasswordLoginResponseSpec)
                 .extract()
-                .as(WrongCredentialsLoginResponseModel.class);
+                .as(DetailErrorResponseModel.class);
 
         //фактическое значение забираем
         String actualDetailErrorAccess = loginResponse.detail();
@@ -75,13 +96,13 @@ public class LoginTests extends TestBase {
         assertThat(actualDetailErrorAccess).isEqualTo(EXPECTED_ERROR_WRONG_PASSWORD);
     }
 
-    @DisplayName("Негативный тест - 401 статус-код - некорректный username")
+    @DisplayName("Негативный тест - некорректный username: 401 статус-код ")
     @Test
     public void wrongUsernameLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.VALID_PASSWORD);
+        LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
 
-        WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        DetailErrorResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -89,7 +110,7 @@ public class LoginTests extends TestBase {
                 .then()
                 .spec(wrongUsernameLoginResponseSpec)
                 .extract()
-                .as(WrongCredentialsLoginResponseModel.class);
+                .as(DetailErrorResponseModel.class);
 
         //фактическое значение забираем
         String actualDetailError = loginResponse.detail();
@@ -99,13 +120,13 @@ public class LoginTests extends TestBase {
         assertThat(actualDetailError).isEqualTo(EXPECTED_ERROR_WRONG_USERNAME);
     }
 
-    @DisplayName("Негативный тест - 400 статус-код - пустой username")
+    @DisplayName("Негативный тест - пустой username: 400 статус-код")
     @Test
     public void emptyUsernameLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.VALID_PASSWORD);
+        LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.getRandomPassword());
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -122,13 +143,13 @@ public class LoginTests extends TestBase {
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_EMPTY_FIELD);
     }
 
-    @DisplayName("Негативный тест - 400 статус-код - пустой password")
+    @DisplayName("Негативный тест - пустой password: 400 статус-код")
     @Test
     public void emptyPasswordLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.VALID_USERNAME, TestData.EMPTY_VALUE);
+        LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -145,13 +166,13 @@ public class LoginTests extends TestBase {
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_EMPTY_FIELD);
     }
 
-    @DisplayName("Негативный тест - 400 статус-код - username = null")
+    @DisplayName("Негативный тест - username = null: 400 статус-код")
     @Test
     public void nullUsernameLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.VALID_PASSWORD);
+        LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.getRandomPassword());
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -168,13 +189,13 @@ public class LoginTests extends TestBase {
         assertThat(actualPasswordError).contains(EXPECTED_ERROR_NULL_FIELD);
     }
 
-    @DisplayName("Негативный тест - 400 статус-код  - пустой JSON")
+    @DisplayName("Негативный тест - пустой JSON: 400 статус-код")
     @Test
     public void emptyJsonLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
 
-        EmptyCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        EmptyCredentialsLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(loginData)
                 .when()
@@ -194,12 +215,12 @@ public class LoginTests extends TestBase {
     }
 
     @Test
-    @DisplayName("Негативный тест - 400 Bad Request при отправке закрывающей скобки")
+    @DisplayName("Негативный тест - некорректный синтаксис: 400 статус-код")
     public void invalidParenthesisJsonLoginTest() {
         String brokenBody = ")";
 
         // отправляем строку напрямую и десериализуем в готовую модель ошибок
-        WrongCredentialsLoginResponseModel loginResponse = given(loginRequestSpec)
+        DetailErrorResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(brokenBody)
                 .when()
@@ -208,7 +229,7 @@ public class LoginTests extends TestBase {
                 .statusCode(400)
                 .log().all()
                 .extract()
-                .as(WrongCredentialsLoginResponseModel.class);
+                .as(DetailErrorResponseModel.class);
 
         //проверяем точное совпадение текста ошибки через AssertJ
         assertThat(loginResponse.detail())
