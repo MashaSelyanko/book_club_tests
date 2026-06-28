@@ -11,10 +11,8 @@ import models.registration.RegistrationBodyModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
-
 import static TestData.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
