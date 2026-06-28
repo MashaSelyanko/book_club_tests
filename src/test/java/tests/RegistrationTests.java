@@ -1,19 +1,16 @@
 package tests;
 
-import TestData.TestData;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-
 import java.util.concurrent.atomic.AtomicReference;
-
 import static TestData.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static specs.registration.RegistrationSpec.*;
 import static org.assertj.core.api.Assertions.assertThat;
+import static specs.registration.RegistrationSpec.*;
 
 public class RegistrationTests extends TestBase {
     //TestData testData = new TestData();
@@ -127,7 +124,7 @@ public class RegistrationTests extends TestBase {
                     .as(RegistrationErrorResponseModel.class));
         });
 
-        step("Верификация сообщения об ошибке валидации бэкенда", () -> {
+        step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             var error = errorResponse.get(); //var и get() - извлекаем значение из обертки
 
             //берем текст ошибки из DTO-модели ошибок
