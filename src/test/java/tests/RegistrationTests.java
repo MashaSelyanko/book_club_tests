@@ -6,6 +6,9 @@ import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
+import java.util.concurrent.atomic.AtomicReference;
+
 import static TestData.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
@@ -13,52 +16,75 @@ import static specs.registration.RegistrationSpec.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class RegistrationTests extends TestBase {
-    TestData testData = new TestData();
+    //TestData testData = new TestData();
 
     @DisplayName("Позитивный тест - успешная регистрация пользователя: 201 статус-код")
     @Test
     public void successfulRegistrationTest() {
 
-        String expectedUsername = testData.getRandomUsername();
-        String expectedPassword = testData.getRandomPassword();
+        String expectedUsername = getRandomUsername();
+        String expectedPassword = getRandomPassword();
 
-        step("Проверка успешной регистрации пользователя", () -> {
-        //работает в связке с конструктором (класс RegistrationBodyPojoModel
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        // объявляем переменную заранее, чтобы данные переходили из step в step
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
+                (expectedUsername, expectedPassword);
 
-        SuccessfulRegistrationResponseRecordsModel registrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
-                .when()
-                .post("users/register/")
-                .then()
-                .spec(successfulRegistrationResponseSpec)
-                .extract()
-                .as(SuccessfulRegistrationResponseRecordsModel.class);
+        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
+        AtomicReference<SuccessfulRegistrationResponseRecordsModel> registrationResponse = new AtomicReference<>();
+
+        step("Успешная регистрация пользователя", () -> {
+            //работает в связке с конструктором (класс RegistrationBodyPojoModel
+
+            registrationResponse.set(given(userRequestSpec)
+                    .config(timeoutConfig)
+                    .body(registrationData)
+                    .when()
+                    .post("users/register/")
+                    .then()
+                    .spec(successfulRegistrationResponseSpec)
+                    .extract()
+                    .as(SuccessfulRegistrationResponseRecordsModel.class));
+        });
 
         //Assert
-        String actualUsername = registrationResponse.username();
-        //проверки AssertJ
-        // указываем сначала фактическое, потом ожидаемое значение username
-        assertThat(actualUsername)
-                .as("Проверка на соответствие username")
-                .isEqualTo(expectedUsername);
-        assertThat(registrationResponse.firstName())
-                .as("Проверка, что поле firstName вернулось пустое")
-                .isEqualTo("");
+        step("Проверка результата регистрации", () -> {
+            // берем объект ответа из обертки один раз
+            var response = registrationResponse.get();
 
-        assertThat(registrationResponse.lastName())
-                .as("Проверка, что поле lastName вернулось пустое")
-                .isEqualTo("");
+            //Подшаг 1
+            step("Проверка соответствия username)", () -> {
+                assertThat(response.username())
+                        .as("Проверка на соответствие username")
+                        .isEqualTo(expectedUsername);
+            });
 
-        assertThat(registrationResponse.id())
-                .as("Проверка, что id положительное число")
-                .isGreaterThan(0); // что >0
+            // Подшаг 2
+            step("Проверка, что поле firstName вернулось пустым", () -> {
+                assertThat(response.firstName())
+                        .as("Проверка, что поле firstName вернулось пустое")
+                        .isEmpty();
+            });
 
-        assertThat(registrationResponse.remoteAddr())
-                .as("Проверка формата полученного ip-адреса")
-                .matches(IP_ADDRESS_REGEXP);
+            // Подшаг 3
+            step("Проверка, что поле lastName вернулось пустым", () -> {
+                assertThat(response.lastName())
+                        .as("Проверка, что поле lastName вернулось пустое")
+                        .isEmpty();
+            });
+
+            // Подшаг 4
+            step("Проверка, что ID пользователя — положительное число", () -> {
+                assertThat(response.id())
+                        .as("Проверка, что id положительное число")
+                        .isGreaterThan(0);
+            });
+
+            // Подшаг 5
+            step("Проверка формата полученного ip-адреса", () -> {
+                assertThat(response.remoteAddr())
+                        .as("Проверка формата полученного ip-адреса")
+                        .matches(IP_ADDRESS_REGEXP);
+            });
         });
     }
 
@@ -66,72 +92,108 @@ public class RegistrationTests extends TestBase {
     @Test
     public void existingUserWrongRegistrationTest() {
 
-        String expectedUsername = testData.getRandomUsername();
-        String expectedPassword = testData.getRandomPassword();
+        String expectedUsername = getRandomUsername();
+        String expectedPassword = getRandomPassword();
 
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        // объявляем переменную заранее, чтобы данные переходили из step в step
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
+                (expectedUsername, expectedPassword);
 
-        SuccessfulRegistrationResponseRecordsModel firstRegistrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
-                .when()
-                .post("users/register/")
-                .then()
-                .spec(successfulRegistrationResponseSpec)
-                .extract()
-                .as(SuccessfulRegistrationResponseRecordsModel.class);
+        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
+        AtomicReference<RegistrationErrorResponseModel> errorResponse = new AtomicReference<>();
 
-        RegistrationErrorResponseModel secondRegistrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
-                .when()
-                .post("users/register/")
-                .then()
-                .spec(wrongRegistrationResponseSpec)
-                .extract()
-                .as(RegistrationErrorResponseModel.class);
+        step("Предусловие: успешная регистрация пользователя", () -> {
+            given(userRequestSpec)
+                    .config(timeoutConfig)
+                    .body(registrationData)
+                    .when()
+                    .post("users/register/")
+                    .then()
+                    .spec(successfulRegistrationResponseSpec)
+                    .extract()
+                    .as(SuccessfulRegistrationResponseRecordsModel.class);
+        });
 
-        String actualError = secondRegistrationResponse.username().getFirst();
-        assertThat(actualError).isEqualTo(EXPECTED_ERROR_DUPLICATE_USERNAME_ERROR);
+        step("Отправка дубликата запроса на регистацию", () -> {
+
+            errorResponse.set(given(userRequestSpec)                //добавляем set()
+                    .config(timeoutConfig)
+                    .body(registrationData)
+                    .when()
+                    .post("users/register/")
+                    .then()
+                    .spec(wrongRegistrationResponseSpec)
+                    .extract()
+                    .as(RegistrationErrorResponseModel.class));
+        });
+
+        step("Верификация сообщения об ошибке валидации бэкенда", () -> {
+            var error = errorResponse.get(); //var и get() - извлекаем значение из обертки
+
+            //берем текст ошибки из DTO-модели ошибок
+            String actualError = error.username().getFirst();
+
+            assertThat(actualError)
+                    .as("Проверка текста ошибки дублирования username")
+                    .isEqualTo(EXPECTED_ERROR_DUPLICATE_USERNAME_ERROR);
+        });
     }
 
-    @DisplayName("Негативный тест -регистрация пользователя с username более 150 символов: 400 статус-код")
+    @DisplayName("Негативный тест - регистрация пользователя с username более 150 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthUsernameRegistrationTest() {
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(testData.exceedingMaxLengthUsername,
-                testData.getRandomPassword());
-        RegistrationErrorResponseModel secondRegistrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
-                .when()
-                .post("users/register/")
-                .then()
-                .spec(exceedingMaxLengthUsernameRegistrationResponseSpec)
-                .extract()
-                .as(RegistrationErrorResponseModel.class);
+        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
+        AtomicReference<RegistrationErrorResponseModel> secondRegistrationResponse = new AtomicReference<>();
 
-        String actualError = secondRegistrationResponse.username().getFirst();
-        assertThat(actualError).isEqualTo(EXPECTED_ERROR_EXCEEDED_USERNAME_MAX_LENGTH);
+        step("Регистрация пользователя с username более 150 символов (400)", () -> {
+            RegistrationBodyModel registrationData = new RegistrationBodyModel
+                    (exceedingMaxLengthUsername, getRandomPassword());
+            secondRegistrationResponse.set(given(userRequestSpec)
+                    .config(timeoutConfig)
+                    .body(registrationData)
+                    .when()
+                    .post("users/register/")
+                    .then()
+                    .spec(exceedingMaxLengthUsernameRegistrationResponseSpec)
+                    .extract()
+                    .as(RegistrationErrorResponseModel.class));
+        });
+
+        step("Верификация сообщения об ошибке валидации бэкенда", () -> {
+            String actualError = secondRegistrationResponse.get().username().getFirst();
+
+            assertThat(actualError)
+                    .as("Проверка текста ошибки при превышении количества вводимых значений в поле username")
+                    .isEqualTo(EXPECTED_ERROR_EXCEEDED_USERNAME_MAX_LENGTH);
+        });
     }
 
     @DisplayName("Негативный тест -регистрация пользователя с password более 128 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
-        RegistrationBodyModel registrationData =
-                new RegistrationBodyModel(testData.getRandomUsername(), testData.exceedingMaxLengthPassword);
-        RegistrationErrorResponseModel secondRegistrationResponse = given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(registrationData)
-                .when()
-                .post("users/register/")
-                .then()
-                .spec(exceedingMaxLengthPasswordRegistrationResponseSpec)
-                .extract()
-                .as(RegistrationErrorResponseModel.class);
+        AtomicReference<RegistrationErrorResponseModel> secondRegistrationResponse = new AtomicReference<>();
 
-        String actualError = secondRegistrationResponse.password().getFirst();
-        assertThat(actualError).isEqualTo(EXPECTED_ERROR_EXCEEDED_PASSWORD_MAX_LENGTH);
+        RegistrationBodyModel registrationData =
+                new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
+
+        step("Регистрация пользователя с password более 128 символов (400)", () -> {
+            secondRegistrationResponse.set(given(userRequestSpec)
+                    .config(timeoutConfig)
+                    .body(registrationData)
+                    .when()
+                    .post("users/register/")
+                    .then()
+                    .spec(exceedingMaxLengthPasswordRegistrationResponseSpec)
+                    .extract()
+                    .as(RegistrationErrorResponseModel.class));
+        });
+
+        step("Верификация сообщения об ошибке валидации бэкенда", () -> {
+            String actualError = secondRegistrationResponse.get().password().getFirst();
+            assertThat(actualError)
+                    .as("Проверка текста ошибки при превышении количества вводимых значений в поле password")
+                    .isEqualTo(EXPECTED_ERROR_EXCEEDED_PASSWORD_MAX_LENGTH);
+        });
     }
 }
 

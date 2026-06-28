@@ -9,9 +9,9 @@ import models.registration.RegistrationBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import static TestData.TestData.*;
+import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.BDDAssumptions.given;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 import static specs.logout.LogoutSpec.*;
 import static specs.registration.RegistrationSpec.userRequestSpec;
@@ -27,15 +27,18 @@ public class LogoutTests extends TestBase {
         String expectedUsername = testData.getRandomUsername();
         String expectedPassword = testData.getRandomPassword();
 
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
-        given(userRequestSpec)
-                .config(timeoutConfig)
-                .body(RegistrationData)
-                .when()
-                .post("/users/register/")
-                .then();
+        step("Успешная регистрация пользователя", () -> {
+            RegistrationBodyModel RegistrationData = new RegistrationBodyModel(expectedUsername,
+                    expectedPassword);
+            given(userRequestSpec)
+                    .config(timeoutConfig)
+                    .body(RegistrationData)
+                    .when()
+                    .post("/users/register/")
+                    .then();
+        });
 
+        step("Получение токена и успешный logout", () -> {
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
         SuccessfulLoginResponseModel loginResponse = given(userRequestSpec)
                 .config(timeoutConfig)
@@ -57,6 +60,7 @@ public class LogoutTests extends TestBase {
                 .post("/auth/logout/")
                 .then()
                 .spec(successfulLogoutResponseSpec);
+        });
     }
 
     @DisplayName("Негативный тест на logout - невалидный токен: 401 статус-код")
