@@ -1,4 +1,4 @@
-package specs.UpdateUser;
+package specs.update_user;
 
 import io.restassured.builder.ResponseSpecBuilder;
 import io.restassured.specification.RequestSpecification;

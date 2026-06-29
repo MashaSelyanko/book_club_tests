@@ -2,7 +2,7 @@
 
 package tests;
 
-import TestData.TestData;
+import test_data.TestData;
 import models.DetailErrorResponseModel;
 import models.login.EmptyCredentialsLoginResponseModel;
 import models.login.LoginBodyModel;
@@ -12,7 +12,7 @@ import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.List;
-import static TestData.TestData.*;
+import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;

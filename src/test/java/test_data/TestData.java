@@ -1,4 +1,4 @@
-package TestData;
+package test_data;
 
 
 import net.datafaker.Faker;

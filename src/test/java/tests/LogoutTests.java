@@ -1,6 +1,6 @@
 package tests;
 
-import TestData.TestData;
+import test_data.TestData;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import models.logout.LogoutBodyModel;
@@ -8,7 +8,7 @@ import models.logout.RepeatedLogoutResponseModel;
 import models.registration.RegistrationBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static TestData.TestData.*;
+import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;

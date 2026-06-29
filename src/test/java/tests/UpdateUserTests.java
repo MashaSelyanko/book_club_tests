@@ -1,6 +1,6 @@
 package tests;
 
-import TestData.TestData;
+import test_data.TestData;
 import models.DetailErrorResponseModel;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
@@ -12,11 +12,11 @@ import models.updateUser.UpdateUserResponseInvalidEmailModel;
 import models.updateUser.UpdateUserResponseModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static TestData.TestData.*;
+import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.UpdateUser.UpdateUserSpec.*;
+import static specs.update_user.UpdateUserSpec.*;
 import static specs.login.LoginSpec.successfulLoginResponseSpec;
 import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
 import static specs.registration.RegistrationSpec.userRequestSpec;
