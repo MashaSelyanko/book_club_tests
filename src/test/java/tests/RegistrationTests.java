@@ -26,52 +26,48 @@ public class RegistrationTests extends TestBase {
 
         SuccessfulRegistrationResponseRecordsModel registrationResponse =
                 step("Успешная регистрация пользователя", () -> {
-            //работает в связке с конструктором (класс RegistrationBodyPojoModel
+                    //работает в связке с конструктором (класс RegistrationBodyPojoModel
                     return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
+                            .config(timeoutConfig)
+                            .body(registrationData)
+                            .when()
+                            .post("users/register/")
+                            .then()
+                            .spec(successfulRegistrationResponseSpec)
+                            .extract()
+                            .as(SuccessfulRegistrationResponseRecordsModel.class);
+                });
 
         //Assert
-            step("Проверка соответствия username)", () -> {
-                assertThat(registrationResponse.username())
-                        .as("Проверка на соответствие username")
-                        .isEqualTo(expectedUsername);
-            });
+        step("Проверка соответствия username)", () -> {
+            assertThat(registrationResponse.username())
+                    .as("Проверка на соответствие username")
+                    .isEqualTo(expectedUsername);
+        });
 
-            // Подшаг 2
-            step("Проверка, что поле firstName вернулось пустым", () -> {
-                assertThat(registrationResponse.firstName())
-                        .as("Проверка, что поле firstName вернулось пустое")
-                        .isEmpty();
-            });
+        step("Проверка, что поле firstName вернулось пустым", () -> {
+            assertThat(registrationResponse.firstName())
+                    .as("Проверка, что поле firstName вернулось пустое")
+                    .isEmpty();
+        });
 
-            // Подшаг 3
-            step("Проверка, что поле lastName вернулось пустым", () -> {
-                assertThat(registrationResponse.lastName())
-                        .as("Проверка, что поле lastName вернулось пустое")
-                        .isEmpty();
-            });
+        step("Проверка, что поле lastName вернулось пустым", () -> {
+            assertThat(registrationResponse.lastName())
+                    .as("Проверка, что поле lastName вернулось пустое")
+                    .isEmpty();
+        });
 
-            // Подшаг 4
-            step("Проверка, что ID пользователя — положительное число", () -> {
-                assertThat(registrationResponse.id())
-                        .as("Проверка, что id положительное число")
-                        .isGreaterThan(0);
-            });
+        step("Проверка, что ID пользователя — положительное число", () -> {
+            assertThat(registrationResponse.id())
+                    .as("Проверка, что id положительное число")
+                    .isGreaterThan(0);
+        });
 
-            // Подшаг 5
-            step("Проверка формата полученного ip-адреса", () -> {
-                assertThat(registrationResponse.remoteAddr())
-                        .as("Проверка формата полученного ip-адреса")
-                        .matches(IP_ADDRESS_REGEXP);
-            });
+        step("Проверка формата полученного ip-адреса", () -> {
+            assertThat(registrationResponse.remoteAddr())
+                    .as("Проверка формата полученного ip-адреса")
+                    .matches(IP_ADDRESS_REGEXP);
+        });
     }
 
     @DisplayName("Негативный тест - дублирование при создании клиента: 400 статус-код")
@@ -98,18 +94,17 @@ public class RegistrationTests extends TestBase {
         });
 
         RegistrationErrorResponseModel errorResponse =
-                 step("Отправка дубликата запроса на регистацию", () -> {
-
-                     return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(wrongRegistrationResponseSpec)
-                    .extract()
-                    .as(RegistrationErrorResponseModel.class);
-        });
+                step("Отправка дубликата запроса на регистацию", () -> {
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(registrationData)
+                            .when()
+                            .post("users/register/")
+                            .then()
+                            .spec(wrongRegistrationResponseSpec)
+                            .extract()
+                            .as(RegistrationErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
 
@@ -129,17 +124,17 @@ public class RegistrationTests extends TestBase {
                 (exceedingMaxLengthUsername, getRandomPassword());
 
         RegistrationErrorResponseModel secondRegistrationResponse =
-        step("Регистрация пользователя с username более 150 символов (400)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(exceedingMaxLengthUsernameRegistrationResponseSpec)
-                    .extract()
-                    .as(RegistrationErrorResponseModel.class);
-        });
+                step("Регистрация пользователя с username более 150 символов (400)", () -> {
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(registrationData)
+                            .when()
+                            .post("users/register/")
+                            .then()
+                            .spec(exceedingMaxLengthUsernameRegistrationResponseSpec)
+                            .extract()
+                            .as(RegistrationErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда", () -> {
             String actualError = secondRegistrationResponse.username().getFirst();
@@ -154,21 +149,21 @@ public class RegistrationTests extends TestBase {
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
 
-        RegistrationBodyModel registrationData =
-                new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
-
         RegistrationErrorResponseModel secondRegistrationResponse =
-        step("Регистрация пользователя с password более 128 символов (400)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(exceedingMaxLengthPasswordRegistrationResponseSpec)
-                    .extract()
-                    .as(RegistrationErrorResponseModel.class);
-        });
+                step("Регистрация пользователя с password более 128 символов (400)", () -> {
+                    RegistrationBodyModel registrationData =
+                            new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(registrationData)
+                            .when()
+                            .post("users/register/")
+                            .then()
+                            .spec(exceedingMaxLengthPasswordRegistrationResponseSpec)
+                            .extract()
+                            .as(RegistrationErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда", () -> {
             String actualError = secondRegistrationResponse.password().getFirst();

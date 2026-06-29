@@ -42,20 +42,20 @@ public class LogoutTests extends TestBase {
 
         SuccessfulLoginResponseModel loginResponse =
                 step("Получение токена", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
-
-        String refreshToken = loginResponse.refresh();
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         step("Успешный logout", () -> {
+            String refreshToken = loginResponse.refresh();
+
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
             given(logoutRequestSpec)
                     .config(timeoutConfig)
@@ -70,20 +70,20 @@ public class LogoutTests extends TestBase {
     @DisplayName("Негативный тест на logout - невалидный токен: 401 статус-код")
     @Test
     public void invalidTokenLogout() {
-        LogoutBodyModel logoutData = new LogoutBodyModel(testData.INVALID_TOKEN);
-
         RepeatedLogoutResponseModel logoutResponse =
-        step("Неуспешный logout (невалидный токен)", () -> {
-            return given(logoutRequestSpec)
-                    .config(timeoutConfig)
-                    .body(logoutData)
-                    .when()
-                    .post("/auth/logout/")
-                    .then()
-                    .spec(invalidLogoutResponseSpec)
-                    .extract()
-                    .as(RepeatedLogoutResponseModel.class);
-        });
+                step("Неуспешный logout (невалидный токен)", () -> {
+                    LogoutBodyModel logoutData = new LogoutBodyModel(testData.INVALID_TOKEN);
+
+                    return given(logoutRequestSpec)
+                            .config(timeoutConfig)
+                            .body(logoutData)
+                            .when()
+                            .post("/auth/logout/")
+                            .then()
+                            .spec(invalidLogoutResponseSpec)
+                            .extract()
+                            .as(RepeatedLogoutResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             assertThat(logoutResponse.detail())
@@ -111,18 +111,18 @@ public class LogoutTests extends TestBase {
                     .then();
         });
 
-SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
+        SuccessfulLoginResponseModel loginResponse =
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         String refreshToken = loginResponse.refresh();
         LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
@@ -137,22 +137,22 @@ SuccessfulLoginResponseModel loginResponse =
                     .spec(successfulLogoutResponseSpec);
         });
 
-RepeatedLogoutResponseModel logoutResponse =
-        step("Повторный logout", () -> {
-            return given(logoutRequestSpec)
-                    .body(logoutData)
-                    .when()
-                    .post("/auth/logout/")
-                    .then()
-                    .spec(invalidLogoutResponseSpec)
-                    .extract()
-                    .as(RepeatedLogoutResponseModel.class);
-        });
-
-        String actualDetailReusedRefreshToken = logoutResponse.detail();
-        String actualCodeReusedRefreshToken = logoutResponse.code();
+        RepeatedLogoutResponseModel logoutResponse =
+                step("Повторный logout", () -> {
+                    return given(logoutRequestSpec)
+                            .body(logoutData)
+                            .when()
+                            .post("/auth/logout/")
+                            .then()
+                            .spec(invalidLogoutResponseSpec)
+                            .extract()
+                            .as(RepeatedLogoutResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда при повторном logout (401)", () -> {
+            String actualDetailReusedRefreshToken = logoutResponse.detail();
+            String actualCodeReusedRefreshToken = logoutResponse.code();
+
             assertThat(actualDetailReusedRefreshToken)
                     .as("Проверка наличия ошибки logout при невалидном токене")
                     .isEqualTo(EXPECTED_ERROR_TOKEN_IS_BLACKLISTED);

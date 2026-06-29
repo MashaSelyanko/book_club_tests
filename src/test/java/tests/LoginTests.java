@@ -29,7 +29,7 @@ public class LoginTests extends TestBase {
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-       RegistrationBodyModel registrationData = new RegistrationBodyModel
+        RegistrationBodyModel registrationData = new RegistrationBodyModel
                 (expectedUsername, expectedPassword);
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
@@ -46,22 +46,22 @@ public class LoginTests extends TestBase {
         });
 
         SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
-
-        //ожидаемое значение
-        String expectedTokenPath = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.";
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         step("Верификация структуры и валидности полученных JWT-токенов", () -> {
+            //ожидаемое значение
+            String expectedTokenPath = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.";
+
             //фактическое значение забираем
             String actualAccess = loginResponse.access();
             String actualRefresh = loginResponse.refresh();
@@ -84,21 +84,22 @@ public class LoginTests extends TestBase {
     @Test
     public void wrongPasswordLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel
-                (getRandomUsername(), TestData.WRONG_PASSWORD);
 
         DetailErrorResponseModel loginResponse =
-        step("Отправка запроса на авторизацию с некорректным паролем", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(wrongPasswordLoginResponseSpec)
-                    .extract()
-                    .as(DetailErrorResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию с некорректным паролем", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel
+                            (getRandomUsername(), TestData.WRONG_PASSWORD);
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(wrongPasswordLoginResponseSpec)
+                            .extract()
+                            .as(DetailErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
@@ -114,20 +115,20 @@ public class LoginTests extends TestBase {
     @Test
     public void wrongUsernameLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
-
         DetailErrorResponseModel loginResponse =
-        step("Отправка запроса на авторизацию с некорректным username", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(wrongUsernameLoginResponseSpec)
-                    .extract()
-                    .as(DetailErrorResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию с некорректным username", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(wrongUsernameLoginResponseSpec)
+                            .extract()
+                            .as(DetailErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
@@ -146,22 +147,22 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.getRandomPassword());
 
         EmptyCredentialsLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию с пустым username", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(emptyUsernameLoginResponseSpec)
-                    .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class);
-        });
-
-        //получаем список ошибок
-        List<String> actualPasswordError = loginResponse.username();
+                step("Отправка запроса на авторизацию с пустым username", () -> {
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(emptyUsernameLoginResponseSpec)
+                            .extract()
+                            .as(EmptyCredentialsLoginResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
+            //получаем список ошибок
+            List<String> actualPasswordError = loginResponse.username();
+
             //проверяем фактический список ошибок на наличие той, что в ожидаемом результате
             assertThat(actualPasswordError)
                     .as("Проверка текста ошибки при вводе пустого username")
@@ -173,23 +174,26 @@ public class LoginTests extends TestBase {
     @Test
     public void emptyPasswordLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
-        EmptyCredentialsLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию с пустым password", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(emptyPasswordLoginResponseSpec)
-                    .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class);
-        });
 
-        List<String> actualPasswordError = loginResponse.password();
+        EmptyCredentialsLoginResponseModel loginResponse =
+                step("Отправка запроса на авторизацию с пустым password", () -> {
+
+                    LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(emptyPasswordLoginResponseSpec)
+                            .extract()
+                            .as(EmptyCredentialsLoginResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
+            List<String> actualPasswordError = loginResponse.password();
+
             assertThat(actualPasswordError)
                     .as("Проверка текста ошибки при вводе пустого password")
                     .contains(EXPECTED_ERROR_EMPTY_FIELD);
@@ -200,24 +204,24 @@ public class LoginTests extends TestBase {
     @Test
     public void nullUsernameLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.getRandomPassword());
-
         EmptyCredentialsLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию при username = null", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(nullUsernameLoginResponseSpec)
-                    .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию при username = null", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.getRandomPassword());
 
-        List<String> actualPasswordError = loginResponse.username();
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(nullUsernameLoginResponseSpec)
+                            .extract()
+                            .as(EmptyCredentialsLoginResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
+            List<String> actualPasswordError = loginResponse.username();
+
             assertThat(actualPasswordError)
                     .as("Проверка текста ошибки при username = null")
                     .contains(EXPECTED_ERROR_NULL_FIELD);
@@ -228,20 +232,20 @@ public class LoginTests extends TestBase {
     @Test
     public void emptyJsonLoginTest() {
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
-
         EmptyCredentialsLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию при пустом JSON", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(emptyJSONLoginResponseSpec)
-                    .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию при пустом JSON", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(emptyJSONLoginResponseSpec)
+                            .extract()
+                            .as(EmptyCredentialsLoginResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             List<String> actualResponseError = loginResponse.username();
@@ -260,21 +264,22 @@ public class LoginTests extends TestBase {
     @Test
     @DisplayName("Негативный тест - некорректный синтаксис: 400 статус-код")
     public void invalidParenthesisJsonLoginTest() {
-        String brokenBody = ")";
 
         DetailErrorResponseModel loginResponse =
-        step("Отправка запроса на авторизацию при некорректном синтаксисе в запросе", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(brokenBody)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .statusCode(400)
-                    .log().all()
-                    .extract()
-                    .as(DetailErrorResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию при некорректном синтаксисе в запросе", () -> {
+                    String brokenBody = ")";
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(brokenBody)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .statusCode(400)
+                            .log().all()
+                            .extract()
+                            .as(DetailErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             //проверяем точное совпадение текста ошибки через AssertJ

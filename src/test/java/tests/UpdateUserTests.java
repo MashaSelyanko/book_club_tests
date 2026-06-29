@@ -46,22 +46,20 @@ public class UpdateUserTests extends TestBase {
                     .as(SuccessfulRegistrationResponseRecordsModel.class);
         });
 
-        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-
         SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
-        String accessToken = loginResponse.access();
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         // подготовка ожидаемых данных
         String expectedFirstName = getRandomFirstName();
@@ -76,22 +74,24 @@ public class UpdateUserTests extends TestBase {
         );
 
         UpdateUserResponseModel updateUserResponse =
-        step("Успешное обновление пользователя (метод PUT)", () -> {
-            return given(updateUserRequestSpec)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .body(updateUser)
-                    .when()
-                    .put("/users/me/")
-                    .then()
-                    .spec(updateUserResponseSpec)
-                    .extract()
-                    .as(UpdateUserResponseModel.class);
-        });
+                step("Успешное обновление пользователя (метод PUT)", () -> {
+                    String accessToken = loginResponse.access();
 
-        //Assert
-        String actualUsername = updateUserResponse.username();
+                    return given(updateUserRequestSpec)
+                            .header("Authorization", "Bearer " + accessToken)
+                            .body(updateUser)
+                            .when()
+                            .put("/users/me/")
+                            .then()
+                            .spec(updateUserResponseSpec)
+                            .extract()
+                            .as(UpdateUserResponseModel.class);
+                });
 
         step("Проверка корректного обновления username)", () -> {
+            //Assert
+            String actualUsername = updateUserResponse.username();
+
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
                     .isEqualTo(expectedUsername);
@@ -155,20 +155,21 @@ public class UpdateUserTests extends TestBase {
                     .as(SuccessfulRegistrationResponseRecordsModel.class);
         });
 
-        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
         SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
+
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         String accessToken = loginResponse.access();
 
@@ -184,21 +185,21 @@ public class UpdateUserTests extends TestBase {
         );
 
         UpdateUserResponseModel updateUserResponse =
-        step("Успешное полное обновление пользователя (метод PATCH)", () -> {
-            return given(updateUserRequestSpec)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .body(updateUser)
-                    .when()
-                    .patch("/users/me/")
-                    .then()
-                    .spec(updateUserResponseSpec)
-                    .extract()
-                    .as(UpdateUserResponseModel.class);
-        });
-
-        String actualUsername = updateUserResponse.username();
+                step("Успешное полное обновление пользователя (метод PATCH)", () -> {
+                    return given(updateUserRequestSpec)
+                            .header("Authorization", "Bearer " + accessToken)
+                            .body(updateUser)
+                            .when()
+                            .patch("/users/me/")
+                            .then()
+                            .spec(updateUserResponseSpec)
+                            .extract()
+                            .as(UpdateUserResponseModel.class);
+                });
 
         step("Проверка корректного обновления username)", () -> {
+            String actualUsername = updateUserResponse.username();
+
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
                     .isEqualTo(expectedUsername);
@@ -263,19 +264,17 @@ public class UpdateUserTests extends TestBase {
         });
 
         SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(updateUserRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
-
-        String accessToken = loginResponse.access();
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    return given(updateUserRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
         String expectedEmail = getRandomEmail();
 
@@ -285,22 +284,24 @@ public class UpdateUserTests extends TestBase {
         );
 
         UpdateUserResponseModel partialUpdateUserResponse =
-        step("Успешное частичное обновление пользователя (метод PATCH)", () -> {
-            return given(updateUserRequestSpec)
-                    //.config(timeoutConfig)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .body(partialUpdateUserWitchPatch)
-                    .when()
-                    .patch("/users/me/")
-                    .then()
-                    .spec(partialUpdateUserWithPatchResponseSpec)
-                    .extract()
-                    .as(UpdateUserResponseModel.class);
-        });
+                step("Успешное частичное обновление пользователя (метод PATCH)", () -> {
+                    String accessToken = loginResponse.access();
 
-        String actualUsername = partialUpdateUserWitchPatch.username();
+                    return given(updateUserRequestSpec)
+                            //.config(timeoutConfig)
+                            .header("Authorization", "Bearer " + accessToken)
+                            .body(partialUpdateUserWitchPatch)
+                            .when()
+                            .patch("/users/me/")
+                            .then()
+                            .spec(partialUpdateUserWithPatchResponseSpec)
+                            .extract()
+                            .as(UpdateUserResponseModel.class);
+                });
 
         step("Проверка корректного обновления username)", () -> {
+            String actualUsername = partialUpdateUserWitchPatch.username();
+
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
                     .isEqualTo(expectedUsername);
@@ -341,42 +342,44 @@ public class UpdateUserTests extends TestBase {
                     .as(SuccessfulRegistrationResponseRecordsModel.class);
         });
 
-        LoginBodyModel loginData = new LoginBodyModel
-                (expectedUsername, expectedPassword);
-
         SuccessfulLoginResponseModel loginResponse =
-        step("Отправка запроса на авторизацию (получени токена)", () -> {
-            return given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(loginData)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(successfulLoginResponseSpec)
-                    .extract()
-                    .as(SuccessfulLoginResponseModel.class);
-        });
+                step("Отправка запроса на авторизацию (получени токена)", () -> {
+                    LoginBodyModel loginData = new LoginBodyModel
+                            (expectedUsername, expectedPassword);
 
-        String accessToken = loginResponse.access();
-        String expectedEmail = TestData.WRONG_EMAIL;
+                    return given(userRequestSpec)
+                            .config(timeoutConfig)
+                            .body(loginData)
+                            .when()
+                            .post("/auth/token/")
+                            .then()
+                            .spec(successfulLoginResponseSpec)
+                            .extract()
+                            .as(SuccessfulLoginResponseModel.class);
+                });
 
-        PartialUpdateUserWithPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWithPatchBodyModel(
-                expectedUsername,
-                expectedEmail
-        );
 
         UpdateUserResponseInvalidEmailModel partialUpdateUserResponse =
-        step("Неуспешное обновление пользователя (метод PATCH) - невалидный email", () -> {
-            return given(updateUserRequestSpec)
-                    .header("Authorization", "Bearer " + accessToken)
-                    .body(partialUpdateUserWitchPatch)
-                    .when()
-                    .patch("/users/me/")
-                    .then()
-                    .spec(invalidPartialUpdateUserWithPatchResponseSpec)
-                    .extract()
-                    .as(UpdateUserResponseInvalidEmailModel.class);
-        });
+                step("Неуспешное обновление пользователя (метод PATCH) - невалидный email", () -> {
+
+                    String accessToken = loginResponse.access();
+                    String expectedEmail = TestData.WRONG_EMAIL;
+
+                    PartialUpdateUserWithPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWithPatchBodyModel(
+                            expectedUsername,
+                            expectedEmail
+                    );
+
+                    return given(updateUserRequestSpec)
+                            .header("Authorization", "Bearer " + accessToken)
+                            .body(partialUpdateUserWitchPatch)
+                            .when()
+                            .patch("/users/me/")
+                            .then()
+                            .spec(invalidPartialUpdateUserWithPatchResponseSpec)
+                            .extract()
+                            .as(UpdateUserResponseInvalidEmailModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             //извлекаем текст ошибки
@@ -401,17 +404,17 @@ public class UpdateUserTests extends TestBase {
         );
 
         DetailErrorResponseModel partialUpdateUserResponse =
-        step("Неуспешное обновление пользователя (метод PATCH) - без авторизации", () -> {
-            return given(updateUserRequestSpec)
-                    .config(timeoutConfig)
-                    .body(partialUpdateUserWitchPatch)
-                    .when()
-                    .patch("/users/me/")
-                    .then()
-                    .spec(unauthorizedUpdateUserWithPatchResponseSpec)
-                    .extract()
-                    .as(DetailErrorResponseModel.class);
-        });
+                step("Неуспешное обновление пользователя (метод PATCH) - без авторизации", () -> {
+                    return given(updateUserRequestSpec)
+                            .config(timeoutConfig)
+                            .body(partialUpdateUserWitchPatch)
+                            .when()
+                            .patch("/users/me/")
+                            .then()
+                            .spec(unauthorizedUpdateUserWithPatchResponseSpec)
+                            .extract()
+                            .as(DetailErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             String actualDetail = partialUpdateUserResponse.detail();
@@ -438,16 +441,16 @@ public class UpdateUserTests extends TestBase {
         );
 
         DetailErrorResponseModel partialUpdateUserResponse =
-        step("Неуспешное обновление пользователя (метод PUT) - без авторизации", () -> {
-            return given(updateUserRequestSpec)
-                    .body(updateUser)
-                    .when()
-                    .put("/users/me/")
-                    .then()
-                    .spec(unauthorizedUpdateUserWithPutResponseSpec)
-                    .extract()
-                    .as(DetailErrorResponseModel.class);
-        });
+                step("Неуспешное обновление пользователя (метод PUT) - без авторизации", () -> {
+                    return given(updateUserRequestSpec)
+                            .body(updateUser)
+                            .when()
+                            .put("/users/me/")
+                            .then()
+                            .spec(unauthorizedUpdateUserWithPutResponseSpec)
+                            .extract()
+                            .as(DetailErrorResponseModel.class);
+                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             String actualDetail = partialUpdateUserResponse.detail();
