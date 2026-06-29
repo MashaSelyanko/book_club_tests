@@ -30,7 +30,7 @@ public class UpdateUserSpec {
             .log(ALL)
             .expectStatusCode(200)
             .expectBody(matchesJsonSchemaInClasspath(
-                    "schemas/updateUser/success_partial_update_witch_patch_user.json"))
+                    "schemas/updateUser/success_partial_update_with_patch_user.json"))
             .expectBody("username", notNullValue())
             .expectBody("email", notNullValue())
             .build();
@@ -39,7 +39,7 @@ public class UpdateUserSpec {
             .log(ALL)
             .expectStatusCode(400)
             .expectBody(matchesJsonSchemaInClasspath(
-                    "schemas/updateUser/invalid_partial_update_witch_patch_user.json"))
+                    "schemas/updateUser/invalid_partial_update_with_patch_user.json"))
             .expectBody("email", notNullValue())
             .build();
 
@@ -47,7 +47,7 @@ public class UpdateUserSpec {
             .log(ALL)
             .expectStatusCode(401)
             .expectBody(matchesJsonSchemaInClasspath(
-                    "schemas/updateUser/unauthorized_update_witch_patch_user.json"))
+                    "schemas/updateUser/unauthorized_update_with_patch_user.json"))
             .expectBody("detail", notNullValue())
             .build();
 
@@ -55,7 +55,7 @@ public class UpdateUserSpec {
             .log(ALL)
             .expectStatusCode(401)
             .expectBody(matchesJsonSchemaInClasspath(
-                    "schemas/updateUser/unauthorized_update_witch_patch_user.json"))
+                    "schemas/updateUser/unauthorized_update_with_patch_user.json"))
             .expectBody("detail", notNullValue())
             .build();
 }

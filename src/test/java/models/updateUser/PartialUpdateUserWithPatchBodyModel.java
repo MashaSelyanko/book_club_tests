@@ -1,6 +1,6 @@
 package models.updateUser;
 
-public record PartialUpdateUserWitchPatchBodyModel
+public record PartialUpdateUserWithPatchBodyModel
         (
                 String username,
                 String email

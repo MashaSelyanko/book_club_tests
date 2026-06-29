@@ -12,7 +12,6 @@ import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import static TestData.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
@@ -30,10 +29,7 @@ public class LoginTests extends TestBase {
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
-        AtomicReference<SuccessfulLoginResponseModel> loginResponse = new AtomicReference<>();
-
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
+       RegistrationBodyModel registrationData = new RegistrationBodyModel
                 (expectedUsername, expectedPassword);
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
@@ -49,8 +45,9 @@ public class LoginTests extends TestBase {
                     .as(SuccessfulRegistrationResponseRecordsModel.class);
         });
 
+        SuccessfulLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию (получени токена)", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -58,7 +55,7 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(successfulLoginResponseSpec)
                     .extract()
-                    .as(SuccessfulLoginResponseModel.class));
+                    .as(SuccessfulLoginResponseModel.class);
         });
 
         //ожидаемое значение
@@ -66,8 +63,8 @@ public class LoginTests extends TestBase {
 
         step("Верификация структуры и валидности полученных JWT-токенов", () -> {
             //фактическое значение забираем
-            String actualAccess = loginResponse.get().access();
-            String actualRefresh = loginResponse.get().refresh();
+            String actualAccess = loginResponse.access();
+            String actualRefresh = loginResponse.refresh();
 
             assertThat(actualAccess)
                     .as("Проверка, что access-токен начинается с ожидаемых символов")
@@ -90,11 +87,9 @@ public class LoginTests extends TestBase {
         LoginBodyModel loginData = new LoginBodyModel
                 (getRandomUsername(), TestData.WRONG_PASSWORD);
 
-        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
-        AtomicReference<DetailErrorResponseModel> loginResponse = new AtomicReference<>();
-
+        DetailErrorResponseModel loginResponse =
         step("Отправка запроса на авторизацию с некорректным паролем", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -102,13 +97,12 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(wrongPasswordLoginResponseSpec)
                     .extract()
-                    .as(DetailErrorResponseModel.class));
-
+                    .as(DetailErrorResponseModel.class);
         });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
-            String actualDetailErrorAccess = loginResponse.get().detail();
+            String actualDetailErrorAccess = loginResponse.detail();
 
             assertThat(actualDetailErrorAccess)
                     .as("Проверка текста ошибки при вводе неверного пароля")
@@ -122,11 +116,9 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
 
-        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
-        AtomicReference<DetailErrorResponseModel> loginResponse = new AtomicReference<>();
-
+        DetailErrorResponseModel loginResponse =
         step("Отправка запроса на авторизацию с некорректным username", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -134,12 +126,12 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(wrongUsernameLoginResponseSpec)
                     .extract()
-                    .as(DetailErrorResponseModel.class));
+                    .as(DetailErrorResponseModel.class);
         });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
-            String actualDetailErrorAccess = loginResponse.get().detail();
+            String actualDetailErrorAccess = loginResponse.detail();
 
             assertThat(actualDetailErrorAccess)
                     .as("Проверка текста ошибки при вводе неверного username")
@@ -153,11 +145,9 @@ public class LoginTests extends TestBase {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.getRandomPassword());
 
-        // оборачиваем в AtomicReference локальные переменные, чтобы менять их внутри лямбда-выражений
-        AtomicReference<EmptyCredentialsLoginResponseModel> loginResponse = new AtomicReference<>();
-
+        EmptyCredentialsLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию с пустым username", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -165,11 +155,11 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(emptyUsernameLoginResponseSpec)
                     .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class));
+                    .as(EmptyCredentialsLoginResponseModel.class);
         });
 
         //получаем список ошибок
-        List<String> actualPasswordError = loginResponse.get().username();
+        List<String> actualPasswordError = loginResponse.username();
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //проверяем фактический список ошибок на наличие той, что в ожидаемом результате
@@ -184,10 +174,9 @@ public class LoginTests extends TestBase {
     public void emptyPasswordLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
-        AtomicReference<EmptyCredentialsLoginResponseModel> loginResponse = new AtomicReference<>();
-
+        EmptyCredentialsLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию с пустым password", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -195,10 +184,10 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(emptyPasswordLoginResponseSpec)
                     .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class));
+                    .as(EmptyCredentialsLoginResponseModel.class);
         });
 
-        List<String> actualPasswordError = loginResponse.get().password();
+        List<String> actualPasswordError = loginResponse.password();
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             assertThat(actualPasswordError)
@@ -212,10 +201,10 @@ public class LoginTests extends TestBase {
     public void nullUsernameLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.getRandomPassword());
-        AtomicReference<EmptyCredentialsLoginResponseModel> loginResponse = new AtomicReference<>();
 
+        EmptyCredentialsLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию при username = null", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -223,10 +212,10 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(nullUsernameLoginResponseSpec)
                     .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class));
+                    .as(EmptyCredentialsLoginResponseModel.class);
         });
 
-        List<String> actualPasswordError = loginResponse.get().username();
+        List<String> actualPasswordError = loginResponse.username();
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             assertThat(actualPasswordError)
@@ -240,10 +229,10 @@ public class LoginTests extends TestBase {
     public void emptyJsonLoginTest() {
 
         LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
-        AtomicReference<EmptyCredentialsLoginResponseModel> loginResponse = new AtomicReference<>();
 
+        EmptyCredentialsLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию при пустом JSON", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -251,11 +240,12 @@ public class LoginTests extends TestBase {
                     .then()
                     .spec(emptyJSONLoginResponseSpec)
                     .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class));
+                    .as(EmptyCredentialsLoginResponseModel.class);
         });
+
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-            List<String> actualResponseError = loginResponse.get().username();
-            List<String> actualPasswordError = loginResponse.get().password();
+            List<String> actualResponseError = loginResponse.username();
+            List<String> actualPasswordError = loginResponse.password();
 
             assertThat(actualPasswordError)
                     .as("Проверка наличия ошибки, что поле username пустое")
@@ -271,10 +261,10 @@ public class LoginTests extends TestBase {
     @DisplayName("Негативный тест - некорректный синтаксис: 400 статус-код")
     public void invalidParenthesisJsonLoginTest() {
         String brokenBody = ")";
-        AtomicReference<DetailErrorResponseModel> loginResponse = new AtomicReference<>();
 
+        DetailErrorResponseModel loginResponse =
         step("Отправка запроса на авторизацию при некорректном синтаксисе в запросе", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(brokenBody)
                     .when()
@@ -283,12 +273,12 @@ public class LoginTests extends TestBase {
                     .statusCode(400)
                     .log().all()
                     .extract()
-                    .as(DetailErrorResponseModel.class));
+                    .as(DetailErrorResponseModel.class);
         });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             //проверяем точное совпадение текста ошибки через AssertJ
-            assertThat(loginResponse.get().detail())
+            assertThat(loginResponse.detail())
                     .as("Текст ошибки парсинга JSON некорректен") // на случай, если проверка не пройдена
                     .isEqualTo(EXPECTED_ERROR_JSON_PARSE);
         });

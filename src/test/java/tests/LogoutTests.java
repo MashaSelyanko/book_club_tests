@@ -8,7 +8,6 @@ import models.logout.RepeatedLogoutResponseModel;
 import models.registration.RegistrationBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import java.util.concurrent.atomic.AtomicReference;
 import static TestData.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
@@ -27,8 +26,6 @@ public class LogoutTests extends TestBase {
 
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
-        AtomicReference<SuccessfulLoginResponseModel> loginResponse = new AtomicReference<>();
-
         RegistrationBodyModel RegistrationData = new RegistrationBodyModel
                 (expectedUsername, expectedPassword);
         LoginBodyModel loginData = new LoginBodyModel
@@ -43,8 +40,9 @@ public class LogoutTests extends TestBase {
                     .then();
         });
 
-        step("Получение токена", () -> {
-            loginResponse.set(given(userRequestSpec)
+        SuccessfulLoginResponseModel loginResponse =
+                step("Получение токена", () -> {
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -52,10 +50,10 @@ public class LogoutTests extends TestBase {
                     .then()
                     .spec(successfulLoginResponseSpec)
                     .extract()
-                    .as(SuccessfulLoginResponseModel.class));
+                    .as(SuccessfulLoginResponseModel.class);
         });
 
-        String refreshToken = loginResponse.get().refresh();
+        String refreshToken = loginResponse.refresh();
 
         step("Успешный logout", () -> {
             LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
@@ -73,10 +71,10 @@ public class LogoutTests extends TestBase {
     @Test
     public void invalidTokenLogout() {
         LogoutBodyModel logoutData = new LogoutBodyModel(testData.INVALID_TOKEN);
-        AtomicReference<RepeatedLogoutResponseModel> logoutResponse = new AtomicReference<>();
 
+        RepeatedLogoutResponseModel logoutResponse =
         step("Неуспешный logout (невалидный токен)", () -> {
-            logoutResponse.set(given(logoutRequestSpec)
+            return given(logoutRequestSpec)
                     .config(timeoutConfig)
                     .body(logoutData)
                     .when()
@@ -84,11 +82,11 @@ public class LogoutTests extends TestBase {
                     .then()
                     .spec(invalidLogoutResponseSpec)
                     .extract()
-                    .as(RepeatedLogoutResponseModel.class));
+                    .as(RepeatedLogoutResponseModel.class);
         });
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
-            assertThat(logoutResponse.get().detail())
+            assertThat(logoutResponse.detail())
                     .as("Проверка наличия ошибки logout при невалидном токене")
                     .isEqualTo(EXPECTED_ERROR_INVALID_TOKEN);
         });
@@ -101,9 +99,6 @@ public class LogoutTests extends TestBase {
         String expectedPassword = testData.getRandomPassword();
         LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
-        AtomicReference<SuccessfulLoginResponseModel> loginResponse = new AtomicReference<>();
-        AtomicReference<RepeatedLogoutResponseModel> logoutResponse = new AtomicReference<>();
-
         step("Предусловие: успешная регистрация пользователя", () -> {
             RegistrationBodyModel RegistrationData = new RegistrationBodyModel(
                     expectedUsername,
@@ -115,8 +110,10 @@ public class LogoutTests extends TestBase {
                     .post("/users/register/")
                     .then();
         });
+
+SuccessfulLoginResponseModel loginResponse =
         step("Отправка запроса на авторизацию (получени токена)", () -> {
-            loginResponse.set(given(userRequestSpec)
+            return given(userRequestSpec)
                     .config(timeoutConfig)
                     .body(loginData)
                     .when()
@@ -124,10 +121,10 @@ public class LogoutTests extends TestBase {
                     .then()
                     .spec(successfulLoginResponseSpec)
                     .extract()
-                    .as(SuccessfulLoginResponseModel.class));
+                    .as(SuccessfulLoginResponseModel.class);
         });
 
-        String refreshToken = loginResponse.get().refresh();
+        String refreshToken = loginResponse.refresh();
         LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
 
         step("Успешный logout", () -> {
@@ -140,19 +137,20 @@ public class LogoutTests extends TestBase {
                     .spec(successfulLogoutResponseSpec);
         });
 
+RepeatedLogoutResponseModel logoutResponse =
         step("Повторный logout", () -> {
-            logoutResponse.set(given(logoutRequestSpec)
+            return given(logoutRequestSpec)
                     .body(logoutData)
                     .when()
                     .post("/auth/logout/")
                     .then()
                     .spec(invalidLogoutResponseSpec)
                     .extract()
-                    .as(RepeatedLogoutResponseModel.class));
+                    .as(RepeatedLogoutResponseModel.class);
         });
 
-        String actualDetailReusedRefreshToken = logoutResponse.get().detail();
-        String actualCodeReusedRefreshToken = logoutResponse.get().code();
+        String actualDetailReusedRefreshToken = logoutResponse.detail();
+        String actualCodeReusedRefreshToken = logoutResponse.code();
 
         step("Верификация сообщения об ошибке валидации бэкенда при повторном logout (401)", () -> {
             assertThat(actualDetailReusedRefreshToken)
