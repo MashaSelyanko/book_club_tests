@@ -1,10 +1,14 @@
 package tests;
 
+import allure.api.UsersRegisterPostApiClient;
+import models.login.SuccessfulLoginResponseModel;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import test_data.TestData;
+
 import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
@@ -17,28 +21,15 @@ public class RegistrationTests extends TestBase {
     @Test
     public void successfulRegistrationTest() {
 
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        // объявляем переменную заранее, чтобы данные переходили из step в step
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
-                (expectedUsername, expectedPassword);
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
 
-        SuccessfulRegistrationResponseRecordsModel registrationResponse =
-                step("Успешная регистрация пользователя", () -> {
-                    //работает в связке с конструктором (класс RegistrationBodyPojoModel
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(registrationData)
-                            .when()
-                            .post("users/register/")
-                            .then()
-                            .spec(successfulRegistrationResponseSpec)
-                            .extract()
-                            .as(SuccessfulRegistrationResponseRecordsModel.class);
-                });
+        SuccessfulRegistrationResponseRecordsModel registrationResponse
+                = UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        //Assert
         step("Проверка соответствия username)", () -> {
             assertThat(registrationResponse.username())
                     .as("Проверка на соответствие username")
@@ -74,42 +65,21 @@ public class RegistrationTests extends TestBase {
     @Test
     public void existingUserWrongRegistrationTest() {
 
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        // объявляем переменную заранее, чтобы данные переходили из step в step
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
-                (expectedUsername, expectedPassword);
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
 
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
+        //метод без объявления переменной, т.к. для предусловия нужно только вызвать метод
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        RegistrationErrorResponseModel errorResponse =
-                step("Отправка дубликата запроса на регистацию", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(registrationData)
-                            .when()
-                            .post("users/register/")
-                            .then()
-                            .spec(wrongRegistrationResponseSpec)
-                            .extract()
-                            .as(RegistrationErrorResponseModel.class);
-                });
+        RegistrationErrorResponseModel errorDublicateResponse
+                = UsersRegisterPostApiClient.dublicateRequest(registrationRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-
             //берем текст ошибки из DTO-модели ошибок
-            String actualError = errorResponse.username().getFirst();
+            String actualError = errorDublicateResponse.username().getFirst();
 
             assertThat(actualError)
                     .as("Проверка текста ошибки дублирования username")
@@ -120,24 +90,20 @@ public class RegistrationTests extends TestBase {
     @DisplayName("Негативный тест - регистрация пользователя с username более 150 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthUsernameRegistrationTest() {
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
-                (exceedingMaxLengthUsername, getRandomPassword());
+        //RegistrationBodyModel registrationData = new RegistrationBodyModel
+        //(exceedingMaxLengthUsername, getRandomPassword());
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        RegistrationErrorResponseModel secondRegistrationResponse =
-                step("Регистрация пользователя с username более 150 символов (400)", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(registrationData)
-                            .when()
-                            .post("users/register/")
-                            .then()
-                            .spec(exceedingMaxLengthUsernameRegistrationResponseSpec)
-                            .extract()
-                            .as(RegistrationErrorResponseModel.class);
-                });
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+
+        RegistrationErrorResponseModel errorUsernameResponse
+                = UsersRegisterPostApiClient.wrongUsername(registrationRequest);
+
 
         step("Верификация сообщения об ошибке валидации бэкенда", () -> {
-            String actualError = secondRegistrationResponse.username().getFirst();
+            String actualError = errorUsernameResponse.username().getFirst();
 
             assertThat(actualError)
                     .as("Проверка текста ошибки при превышении количества вводимых значений в поле username")
@@ -145,28 +111,23 @@ public class RegistrationTests extends TestBase {
         });
     }
 
-    @DisplayName("Негативный тест -регистрация пользователя с password более 128 символов: 400 статус-код")
+    @DisplayName("Негативный тест - регистрация пользователя с password более 128 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        RegistrationErrorResponseModel secondRegistrationResponse =
-                step("Регистрация пользователя с password более 128 символов (400)", () -> {
-                    RegistrationBodyModel registrationData =
-                            new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
 
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(registrationData)
-                            .when()
-                            .post("users/register/")
-                            .then()
-                            .spec(exceedingMaxLengthPasswordRegistrationResponseSpec)
-                            .extract()
-                            .as(RegistrationErrorResponseModel.class);
-                });
+        RegistrationErrorResponseModel errorPasswordResponse
+                = UsersRegisterPostApiClient.wrongPassword(registrationRequest);
+
+        // RegistrationBodyModel registrationData =
+        //     new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
 
         step("Верификация сообщения об ошибке валидации бэкенда", () -> {
-            String actualError = secondRegistrationResponse.password().getFirst();
+            String actualError = errorPasswordResponse.password().getFirst();
             assertThat(actualError)
                     .as("Проверка текста ошибки при превышении количества вводимых значений в поле password")
                     .isEqualTo(EXPECTED_ERROR_EXCEEDED_PASSWORD_MAX_LENGTH);

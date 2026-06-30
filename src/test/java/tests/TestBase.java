@@ -1,11 +1,15 @@
 package tests;
 
+import allure.api.ApiClient;
 import io.restassured.RestAssured;
 import io.restassured.config.HttpClientConfig;
 import io.restassured.config.RestAssuredConfig;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.BeforeAll;
 
 public class TestBase {
+
+    protected static final ApiClient api = new ApiClient();
 
     @BeforeAll
     public static void setUp() {
