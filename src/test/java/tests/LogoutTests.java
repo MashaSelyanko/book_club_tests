@@ -1,89 +1,55 @@
 package tests;
 
-import test_data.TestData;
+import api_clients.auth.AuthLogoutPostApiClient;
+import api_clients.auth.AuthTokenPostApiClient;
+import api_clients.users.UsersRegisterPostApiClient;
 import models.login.LoginBodyModel;
-import models.login.SuccessfulLoginResponseModel;
 import models.logout.LogoutBodyModel;
 import models.logout.RepeatedLogoutResponseModel;
 import models.registration.RegistrationBodyModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static test_data.TestData.*;
+import test_data.TestData;
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.login.LoginSpec.successfulLoginResponseSpec;
-import static specs.logout.LogoutSpec.*;
-import static specs.registration.RegistrationSpec.userRequestSpec;
+import static test_data.TestData.*;
 
 public class LogoutTests extends TestBase {
-
-    TestData testData = new TestData();
 
     @DisplayName("Позитивный тест на logout: 200 статус-код")
     @Test
     public void successfulLogout() {
 
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
-        RegistrationBodyModel RegistrationData = new RegistrationBodyModel
-                (expectedUsername, expectedPassword);
-        LoginBodyModel loginData = new LoginBodyModel
-                (expectedUsername, expectedPassword);
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        step("Успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(RegistrationData)
-                    .when()
-                    .post("/users/register/")
-                    .then();
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
+
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String refreshToken = AuthTokenPostApiClient.receiveRefreshToken(loginRequest);
+
+        //logout
+        LogoutBodyModel logoutRequest = new LogoutBodyModel(refreshToken);
+        AuthLogoutPostApiClient.mainLogoutRequest(logoutRequest);
+
+        step("Проверка соответствия username)", () -> {
+            assertThat(registrationRequest.username())
+                    .as("Проверка на соответствие username")
+                    .isEqualTo(expectedUsername);
         });
 
-        SuccessfulLoginResponseModel loginResponse =
-                step("Получение токена", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
-
-        step("Успешный logout", () -> {
-            String refreshToken = loginResponse.refresh();
-
-            LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
-            given(logoutRequestSpec)
-                    .config(timeoutConfig)
-                    .body(logoutData)
-                    .when()
-                    .post("/auth/logout/")
-                    .then()
-                    .spec(successfulLogoutResponseSpec);
-        });
     }
 
     @DisplayName("Негативный тест на logout - невалидный токен: 401 статус-код")
     @Test
     public void invalidTokenLogout() {
-        RepeatedLogoutResponseModel logoutResponse =
-                step("Неуспешный logout (невалидный токен)", () -> {
-                    LogoutBodyModel logoutData = new LogoutBodyModel(testData.INVALID_TOKEN);
-
-                    return given(logoutRequestSpec)
-                            .config(timeoutConfig)
-                            .body(logoutData)
-                            .when()
-                            .post("/auth/logout/")
-                            .then()
-                            .spec(invalidLogoutResponseSpec)
-                            .extract()
-                            .as(RepeatedLogoutResponseModel.class);
-                });
+        LogoutBodyModel logoutRequest = new LogoutBodyModel(TestData.INVALID_TOKEN);
+        RepeatedLogoutResponseModel logoutResponse
+                = AuthLogoutPostApiClient.wrongToken(logoutRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             assertThat(logoutResponse.detail())
@@ -95,63 +61,29 @@ public class LogoutTests extends TestBase {
     @DisplayName("Негативный тест - повторный logout: 401 статус-код")
     @Test
     public void doubleLogout() {
-        String expectedUsername = testData.getRandomUsername();
-        String expectedPassword = testData.getRandomPassword();
-        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
 
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            RegistrationBodyModel RegistrationData = new RegistrationBodyModel(
-                    expectedUsername,
-                    expectedPassword);
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(RegistrationData)
-                    .when()
-                    .post("/users/register/")
-                    .then();
-        });
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        String refreshToken = loginResponse.refresh();
-        LogoutBodyModel logoutData = new LogoutBodyModel(refreshToken);
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String refreshToken = AuthTokenPostApiClient.receiveRefreshToken(loginRequest);
 
-        step("Успешный logout", () -> {
-            given(logoutRequestSpec)
-                    .config(timeoutConfig)
-                    .body(logoutData)
-                    .when()
-                    .post("/auth/logout/")
-                    .then()
-                    .spec(successfulLogoutResponseSpec);
-        });
-
-        RepeatedLogoutResponseModel logoutResponse =
-                step("Повторный logout", () -> {
-                    return given(logoutRequestSpec)
-                            .body(logoutData)
-                            .when()
-                            .post("/auth/logout/")
-                            .then()
-                            .spec(invalidLogoutResponseSpec)
-                            .extract()
-                            .as(RepeatedLogoutResponseModel.class);
-                });
+        //logout
+        LogoutBodyModel logoutRequest = new LogoutBodyModel(refreshToken);
+        AuthLogoutPostApiClient.mainLogoutRequest(logoutRequest);
+        //повторный logout
+        RepeatedLogoutResponseModel repeatedLogoutResponseModel
+                = AuthLogoutPostApiClient.wrongToken(logoutRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда при повторном logout (401)", () -> {
-            String actualDetailReusedRefreshToken = logoutResponse.detail();
-            String actualCodeReusedRefreshToken = logoutResponse.code();
+            String actualDetailReusedRefreshToken = repeatedLogoutResponseModel.detail();
+            String actualCodeReusedRefreshToken = repeatedLogoutResponseModel.code();
 
             assertThat(actualDetailReusedRefreshToken)
                     .as("Проверка наличия ошибки logout при невалидном токене")

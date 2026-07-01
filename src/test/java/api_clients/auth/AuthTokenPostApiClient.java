@@ -6,7 +6,6 @@ import models.login.EmptyCredentialsLoginResponseModel;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import specs.registration.RegistrationSpec;
-
 import static io.restassured.RestAssured.given;
 import static specs.login.LoginSpec.*;
 import static specs.registration.RegistrationSpec.userRequestSpec;
@@ -38,7 +37,7 @@ public class AuthTokenPostApiClient {
                 .spec(wrongPasswordLoginResponseSpec)
                 .extract()
                 .as(DetailErrorResponseModel.class);
-}
+    }
 
     @Step("Отправка запроса на авторизацию с некорректным username")
     public static DetailErrorResponseModel wrongUsernameRequest(LoginBodyModel body) {
@@ -52,6 +51,7 @@ public class AuthTokenPostApiClient {
                 .extract()
                 .as(DetailErrorResponseModel.class);
     }
+
     @Step("Отправка запроса на авторизацию с пустым username")
     public static EmptyCredentialsLoginResponseModel emptyUsernameRequest(LoginBodyModel body) {
         return given(userRequestSpec)
@@ -64,21 +64,22 @@ public class AuthTokenPostApiClient {
                 .extract()
                 .as(EmptyCredentialsLoginResponseModel.class);
     }
-        @Step("Отправка запроса на авторизацию с пустым username")
-        public static EmptyCredentialsLoginResponseModel emptyUsername(LoginBodyModel body) {
-            return given(RegistrationSpec.userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(body)
-                    .when()
-                    .post("/auth/token/")
-                    .then()
-                    .spec(emptyPasswordLoginResponseSpec)
-                    .extract()
-                    .as(EmptyCredentialsLoginResponseModel.class);
-        }
+
+    @Step("Отправка запроса на авторизацию с пустым username")
+    public static EmptyCredentialsLoginResponseModel emptyUsername(LoginBodyModel body) {
+        return given(RegistrationSpec.userRequestSpec)
+                .config(timeoutConfig)
+                .body(body)
+                .when()
+                .post("/auth/token/")
+                .then()
+                .spec(emptyPasswordLoginResponseSpec)
+                .extract()
+                .as(EmptyCredentialsLoginResponseModel.class);
+    }
 
     @Step("Отправка запроса на авторизацию с пустым password")
-public static EmptyCredentialsLoginResponseModel emptyPassword(LoginBodyModel body) {
+    public static EmptyCredentialsLoginResponseModel emptyPassword(LoginBodyModel body) {
         return given(RegistrationSpec.userRequestSpec)
                 .config(timeoutConfig)
                 .body(body)
@@ -117,7 +118,7 @@ public static EmptyCredentialsLoginResponseModel emptyPassword(LoginBodyModel bo
     }
 
     @Step("Отправка запроса на авторизацию при некорректном синтаксисе в запросе")
-public static DetailErrorResponseModel invalidSyntax(String body) {
+    public static DetailErrorResponseModel invalidSyntax(String body) {
         return given(userRequestSpec)
                 .config(timeoutConfig)
                 .body(body)
@@ -128,5 +129,17 @@ public static DetailErrorResponseModel invalidSyntax(String body) {
                 .log().all()
                 .extract()
                 .as(DetailErrorResponseModel.class);
+    }
+
+    @Step("Отправка запроса на авторизацию и получение refresh-токена")
+    public static String receiveRefreshToken(LoginBodyModel body) {
+        return given(userRequestSpec)
+                .body(body)
+                .when()
+                .post("/auth/token/")
+                .then()
+                .spec(successfulLoginResponseSpec)
+                .extract()
+                .path("refresh");
     }
 }
