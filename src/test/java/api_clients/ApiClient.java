@@ -1,4 +1,6 @@
-package allure.api;
+package api_clients;
+
+import api_clients.users.UsersRegisterPostApiClient;
 
 public class ApiClient {
 

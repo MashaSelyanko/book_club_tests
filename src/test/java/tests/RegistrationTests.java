@@ -1,7 +1,6 @@
 package tests;
 
-import allure.api.UsersRegisterPostApiClient;
-import models.login.SuccessfulLoginResponseModel;
+import api_clients.users.UsersRegisterPostApiClient;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
@@ -9,11 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import test_data.TestData;
 
-import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.registration.RegistrationSpec.*;
+import static test_data.TestData.*;
 
 public class RegistrationTests extends TestBase {
 
@@ -90,13 +87,10 @@ public class RegistrationTests extends TestBase {
     @DisplayName("Негативный тест - регистрация пользователя с username более 150 символов: 400 статус-код")
     @Test
     public void exceedingMaxLengthUsernameRegistrationTest() {
-        //RegistrationBodyModel registrationData = new RegistrationBodyModel
-        //(exceedingMaxLengthUsername, getRandomPassword());
-        String expectedUsername = TestData.getRandomUsername();
-        String expectedPassword = TestData.getRandomPassword();
+       String expectedPassword = TestData.getRandomPassword();
 
         RegistrationBodyModel registrationRequest
-                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+                = new RegistrationBodyModel(TestData.exceedingMaxLengthUsername, expectedPassword);
 
         RegistrationErrorResponseModel errorUsernameResponse
                 = UsersRegisterPostApiClient.wrongUsername(registrationRequest);
@@ -115,16 +109,12 @@ public class RegistrationTests extends TestBase {
     @Test
     public void exceedingMaxLengthPasswordRegistrationTest() {
         String expectedUsername = TestData.getRandomUsername();
-        String expectedPassword = TestData.getRandomPassword();
 
         RegistrationBodyModel registrationRequest
-                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+                = new RegistrationBodyModel(expectedUsername, TestData.exceedingMaxLengthPassword);
 
         RegistrationErrorResponseModel errorPasswordResponse
                 = UsersRegisterPostApiClient.wrongPassword(registrationRequest);
-
-        // RegistrationBodyModel registrationData =
-        //     new RegistrationBodyModel(getRandomUsername(), exceedingMaxLengthPassword);
 
         step("Верификация сообщения об ошибке валидации бэкенда", () -> {
             String actualError = errorPasswordResponse.password().getFirst();

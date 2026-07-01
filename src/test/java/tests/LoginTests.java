@@ -2,61 +2,36 @@
 
 package tests;
 
-import test_data.TestData;
+import api_clients.auth.AuthTokenPostApiClient;
+import api_clients.users.UsersRegisterPostApiClient;
 import models.DetailErrorResponseModel;
 import models.login.EmptyCredentialsLoginResponseModel;
 import models.login.LoginBodyModel;
 import models.login.SuccessfulLoginResponseModel;
 import models.registration.RegistrationBodyModel;
-import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import test_data.TestData;
 import java.util.List;
-import static test_data.TestData.*;
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.login.LoginSpec.*;
-import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
-import static specs.registration.RegistrationSpec.userRequestSpec;
+import static test_data.TestData.*;
 
 public class LoginTests extends TestBase {
 
     @DisplayName("Позитивный тест - получение токена: 200 статус-код ")
     @Test
     public void successfulLoginTest() {
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
 
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
-                (expectedUsername, expectedPassword);
-        LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
-
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        SuccessfulLoginResponseModel loginResponse
+                = AuthTokenPostApiClient.mainRequest(loginRequest);
 
         step("Верификация структуры и валидности полученных JWT-токенов", () -> {
             //ожидаемое значение
@@ -83,27 +58,15 @@ public class LoginTests extends TestBase {
     @DisplayName("Негативный тест- некорректный password: 401 статус-код ")
     @Test
     public void wrongPasswordLoginTest() {
+        String expectedUsername = TestData.getRandomUsername();
 
-
-        DetailErrorResponseModel loginResponse =
-                step("Отправка запроса на авторизацию с некорректным паролем", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel
-                            (getRandomUsername(), TestData.WRONG_PASSWORD);
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(wrongPasswordLoginResponseSpec)
-                            .extract()
-                            .as(DetailErrorResponseModel.class);
-                });
+        LoginBodyModel wrongPasswordRequest = new LoginBodyModel(expectedUsername, TestData.WRONG_PASSWORD);
+        DetailErrorResponseModel errorPasswordResponse
+                = AuthTokenPostApiClient.wrongPasswordRequest(wrongPasswordRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
-            String actualDetailErrorAccess = loginResponse.detail();
+            String actualDetailErrorAccess = errorPasswordResponse.detail();
 
             assertThat(actualDetailErrorAccess)
                     .as("Проверка текста ошибки при вводе неверного пароля")
@@ -115,53 +78,35 @@ public class LoginTests extends TestBase {
     @Test
     public void wrongUsernameLoginTest() {
 
-        DetailErrorResponseModel loginResponse =
-                step("Отправка запроса на авторизацию с некорректным username", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel(TestData.WRONG_USERNAME, TestData.getRandomPassword());
+        String expectedPassword = TestData.getRandomPassword();
 
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(wrongUsernameLoginResponseSpec)
-                            .extract()
-                            .as(DetailErrorResponseModel.class);
-                });
+        LoginBodyModel wrongUsernameRequest = new LoginBodyModel(TestData.WRONG_USERNAME,expectedPassword);
+        DetailErrorResponseModel errorUsernameResponse
+                = AuthTokenPostApiClient.wrongUsernameRequest(wrongUsernameRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //фактическое значение забираем
-            String actualDetailErrorAccess = loginResponse.detail();
+            String actualDetailErrorAccess = errorUsernameResponse.detail();
 
             assertThat(actualDetailErrorAccess)
                     .as("Проверка текста ошибки при вводе неверного username")
                     .isEqualTo(EXPECTED_ERROR_WRONG_USERNAME);
         });
     }
-
     @DisplayName("Негативный тест - пустой username: 400 статус-код")
     @Test
     public void emptyUsernameLoginTest() {
+        String expectedPassword = TestData.getRandomPassword();
 
-        LoginBodyModel loginData = new LoginBodyModel(TestData.EMPTY_VALUE, TestData.getRandomPassword());
-
-        EmptyCredentialsLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию с пустым username", () -> {
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(emptyUsernameLoginResponseSpec)
-                            .extract()
-                            .as(EmptyCredentialsLoginResponseModel.class);
-                });
+        //Arrange
+        LoginBodyModel emptyUsernameRequest
+                = new LoginBodyModel(TestData.EMPTY_VALUE, expectedPassword);
+        EmptyCredentialsLoginResponseModel errorEmptyUsernameResponse
+                = AuthTokenPostApiClient.emptyUsernameRequest(emptyUsernameRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
             //получаем список ошибок
-            List<String> actualPasswordError = loginResponse.username();
+            List<String> actualPasswordError = errorEmptyUsernameResponse.username();
 
             //проверяем фактический список ошибок на наличие той, что в ожидаемом результате
             assertThat(actualPasswordError)
@@ -173,26 +118,14 @@ public class LoginTests extends TestBase {
     @DisplayName("Негативный тест - пустой password: 400 статус-код")
     @Test
     public void emptyPasswordLoginTest() {
+        String expectedUsername = TestData.getRandomUsername();
 
-
-        EmptyCredentialsLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию с пустым password", () -> {
-
-                    LoginBodyModel loginData = new LoginBodyModel(TestData.getRandomUsername(), TestData.EMPTY_VALUE);
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(emptyPasswordLoginResponseSpec)
-                            .extract()
-                            .as(EmptyCredentialsLoginResponseModel.class);
-                });
+        LoginBodyModel emptyPasswordRequest = new LoginBodyModel(expectedUsername, EMPTY_VALUE);
+        EmptyCredentialsLoginResponseModel errorEmptyPasswordResponse
+                = AuthTokenPostApiClient.emptyPassword(emptyPasswordRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (401)", () -> {
-            List<String> actualPasswordError = loginResponse.password();
+            List<String> actualPasswordError = errorEmptyPasswordResponse.password();
 
             assertThat(actualPasswordError)
                     .as("Проверка текста ошибки при вводе пустого password")
@@ -203,24 +136,16 @@ public class LoginTests extends TestBase {
     @DisplayName("Негативный тест - username = null: 400 статус-код")
     @Test
     public void nullUsernameLoginTest() {
+        String expectedPassword = TestData.getRandomPassword();
 
-        EmptyCredentialsLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию при username = null", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.getRandomPassword());
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(nullUsernameLoginResponseSpec)
-                            .extract()
-                            .as(EmptyCredentialsLoginResponseModel.class);
-                });
+        //Arrange
+        LoginBodyModel nullUsernameRequest = new LoginBodyModel(NULL_VALUE, expectedPassword);
+        //Acc
+        EmptyCredentialsLoginResponseModel errorNullUsernameResponse
+                = AuthTokenPostApiClient.nullUsername(nullUsernameRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-            List<String> actualPasswordError = loginResponse.username();
+            List<String> actualPasswordError = errorNullUsernameResponse.username();
 
             assertThat(actualPasswordError)
                     .as("Проверка текста ошибки при username = null")
@@ -232,32 +157,22 @@ public class LoginTests extends TestBase {
     @Test
     public void emptyJsonLoginTest() {
 
-        EmptyCredentialsLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию при пустом JSON", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel(TestData.NULL_VALUE, TestData.NULL_VALUE);
+String emptyJsonBody = "{}";
+EmptyCredentialsLoginResponseModel errorNullJsonResponse
+                = AuthTokenPostApiClient.nullJSON(emptyJsonBody);
 
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(emptyJSONLoginResponseSpec)
-                            .extract()
-                            .as(EmptyCredentialsLoginResponseModel.class);
-                });
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-            List<String> actualResponseError = loginResponse.username();
-            List<String> actualPasswordError = loginResponse.password();
+            List<String> actualResponseError = errorNullJsonResponse.username();
+            List<String> actualPasswordError = errorNullJsonResponse.password();
 
             assertThat(actualPasswordError)
                     .as("Проверка наличия ошибки, что поле username пустое")
-                    .contains(EXPECTED_ERROR_NULL_FIELD);
+                    .contains(EXPECTED_ERROR_NULL_JSON);
 
             assertThat(actualResponseError)
                     .as("Проверка наличия ошибки, что поле password пустое")
-                    .contains(EXPECTED_ERROR_NULL_FIELD);
+                    .contains(EXPECTED_ERROR_NULL_JSON);
         });
     }
 
@@ -265,25 +180,13 @@ public class LoginTests extends TestBase {
     @DisplayName("Негативный тест - некорректный синтаксис: 400 статус-код")
     public void invalidParenthesisJsonLoginTest() {
 
-        DetailErrorResponseModel loginResponse =
-                step("Отправка запроса на авторизацию при некорректном синтаксисе в запросе", () -> {
-                    String brokenBody = ")";
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(brokenBody)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .statusCode(400)
-                            .log().all()
-                            .extract()
-                            .as(DetailErrorResponseModel.class);
-                });
+        String invalidSyntaxRequest = "{username}";
+        DetailErrorResponseModel invalidSyntaxResponse
+                = AuthTokenPostApiClient.invalidSyntax(invalidSyntaxRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             //проверяем точное совпадение текста ошибки через AssertJ
-            assertThat(loginResponse.detail())
+            assertThat(invalidSyntaxResponse.detail())
                     .as("Текст ошибки парсинга JSON некорректен") // на случай, если проверка не пройдена
                     .isEqualTo(EXPECTED_ERROR_JSON_PARSE);
         });

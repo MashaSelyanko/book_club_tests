@@ -1,4 +1,4 @@
-package models.updateUser;
+package models.update_user;
 
 import java.util.List;
 

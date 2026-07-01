@@ -2,17 +2,18 @@ package test_data;
 
 
 import net.datafaker.Faker;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 public class TestData {
 
     public static Faker faker = new Faker();
 
     //валидные тестовые данные
-    public static String getRandomUsername() {
+    public static @NonNull String getRandomUsername() {
         return "Usr_" + System.currentTimeMillis();
     }
 
-    public static String getRandomPassword() {
+    public static @NonNull String getRandomPassword() {
         return "Pwd_" + System.currentTimeMillis();
     }
 
@@ -37,7 +38,7 @@ public class TestData {
             WRONG_USERNAME = "gaguru000",
             WRONG_EMAIL = "www@.ru",
 
-    EMPTY_VALUE = "",
+            EMPTY_VALUE = "",
             NULL_VALUE = null,
             INVALID_TOKEN = faker.lorem().characters(16, 32,
                     true, true);
@@ -52,7 +53,8 @@ public class TestData {
             EXPECTED_ERROR_WRONG_EMAIL = "Enter a valid email address.",
             EXPECTED_ERROR_EMPTY_FIELD = "This field may not be blank.",
             EXPECTED_ERROR_NULL_FIELD = "This field may not be null.",
-            EXPECTED_ERROR_JSON_PARSE = "JSON parse error - unexpected character: line 1 column 1 (char 0)",
+            EXPECTED_ERROR_NULL_JSON = "This field is required.",
+            EXPECTED_ERROR_JSON_PARSE = "JSON parse error - unexpected character: line 1 column 2 (char 1)",
             EXPECTED_ERROR_INVALID_TOKEN = "Token is invalid",
             EXPECTED_ERROR_TOKEN_IS_BLACKLISTED = "Token is blacklisted",
             EXPECTED_TOKEN_NOT_VALID_CODE = "token_not_valid",

@@ -1,4 +1,4 @@
-package models.updateUser;
+package models.update_user;
 
 public record UpdateUserBodyModel
         (

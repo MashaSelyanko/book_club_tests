@@ -1,20 +1,15 @@
-package allure.api;
+package api_clients.users;
 
 import io.qameta.allure.Step;
-import models.login.LoginBodyModel;
-import models.login.SuccessfulLoginResponseModel;
+import models.login.EmptyCredentialsLoginResponseModel;
 import models.registration.RegistrationBodyModel;
 import models.registration.RegistrationErrorResponseModel;
 import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import specs.registration.RegistrationSpec;
 import tests.TestBase;
-
-import static io.qameta.allure.Allure.step;
 import static io.restassured.RestAssured.given;
-import static specs.login.LoginSpec.successfulLoginResponseSpec;
+import static specs.login.LoginSpec.emptyPasswordLoginResponseSpec;
 import static specs.login.LoginSpec.userRequestSpec;
-import static specs.logout.LogoutSpec.logoutRequestSpec;
-import static specs.logout.LogoutSpec.successfulLogoutResponseSpec;
 import static specs.registration.RegistrationSpec.*;
 
 public class UsersRegisterPostApiClient extends TestBase {
@@ -70,5 +65,8 @@ public class UsersRegisterPostApiClient extends TestBase {
                 .extract()
                 .as(RegistrationErrorResponseModel.class);
     }
+
+
+
 }
 
