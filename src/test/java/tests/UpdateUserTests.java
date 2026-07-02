@@ -1,96 +1,52 @@
 package tests;
 
-import test_data.TestData;
+import api_clients.auth.AuthTokenPostApiClient;
+import api_clients.users.UsersMePatchApiClient;
+import api_clients.users.UsersMePutApiClient;
+import api_clients.users.UsersRegisterPostApiClient;
 import models.DetailErrorResponseModel;
 import models.login.LoginBodyModel;
-import models.login.SuccessfulLoginResponseModel;
 import models.registration.RegistrationBodyModel;
-import models.registration.SuccessfulRegistrationResponseRecordsModel;
 import models.update_user.PartialUpdateUserWithPatchBodyModel;
 import models.update_user.UpdateUserBodyModel;
 import models.update_user.UpdateUserResponseInvalidEmailModel;
 import models.update_user.UpdateUserResponseModel;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import static test_data.TestData.*;
+import test_data.TestData;
 import static io.qameta.allure.Allure.step;
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static specs.update_user.UpdateUserSpec.*;
-import static specs.login.LoginSpec.successfulLoginResponseSpec;
-import static specs.registration.RegistrationSpec.successfulRegistrationResponseSpec;
-import static specs.registration.RegistrationSpec.userRequestSpec;
+import static test_data.TestData.*;
 
 public class UpdateUserTests extends TestBase {
 
     @DisplayName("Позитивный тест - обновление пользователя методом PUT: 200 статус-код")
     @Test
     public void successfulUpdateUserWithPutTest() {
-
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
-
-        //работает в связке с конструктором (класс RegistrationBodyPojoModel)
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
-
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
-
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
-
-        // подготовка ожидаемых данных
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
         String expectedFirstName = getRandomFirstName();
         String expectedLastName = getRandomLastName();
         String expectedEmail = getRandomEmail();
 
-        UpdateUserBodyModel updateUser = new UpdateUserBodyModel(
-                expectedUsername,
-                expectedFirstName,
-                expectedLastName,
-                expectedEmail
-        );
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        UpdateUserResponseModel updateUserResponse =
-                step("Успешное обновление пользователя (метод PUT)", () -> {
-                    String accessToken = loginResponse.access();
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String accessToken = AuthTokenPostApiClient.receiveAccessToken(loginRequest);
 
-                    return given(updateUserRequestSpec)
-                            .header("Authorization", "Bearer " + accessToken)
-                            .body(updateUser)
-                            .when()
-                            .put("/users/me/")
-                            .then()
-                            .spec(updateUserResponseSpec)
-                            .extract()
-                            .as(UpdateUserResponseModel.class);
-                });
+        //обновление(PUT)
+        UpdateUserBodyModel updateRequest = new UpdateUserBodyModel
+                (expectedUsername,expectedFirstName, expectedLastName, expectedEmail);
+        UpdateUserResponseModel changeUserResponse
+                = UsersMePutApiClient.mainRequest(updateRequest, accessToken); //должен передаваться и токен
 
         step("Проверка корректного обновления username)", () -> {
             //Assert
-            String actualUsername = updateUserResponse.username();
+            String actualUsername = changeUserResponse.username();
 
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
@@ -98,36 +54,31 @@ public class UpdateUserTests extends TestBase {
         });
 
         step("Проверка, что полученный id>0)", () -> {
-            assertThat(updateUserResponse
-                    .id())
+            assertThat(changeUserResponse.id())
                     .as("ID пользователя должен быть больше нуля")
                     .isGreaterThan(0);
         });
 
         step("Проверка корректного обновления firstName)", () -> {
-            assertThat(updateUserResponse
-                    .firstName())
+            assertThat(changeUserResponse.firstName())
                     .as("Проверка обновленного имени")
                     .isEqualTo(expectedFirstName);
         });
 
         step("Проверка корректного обновления lastName)", () -> {
-            assertThat(updateUserResponse
-                    .lastName())
+            assertThat(changeUserResponse.lastName())
                     .as("Проверка обновленной фамилии")
                     .isEqualTo(expectedLastName);
         });
 
         step("Проверка корректного обновления email)", () -> {
-            assertThat(updateUserResponse
-                    .email())
+            assertThat(changeUserResponse.email())
                     .as("Проверка обновленного email")
                     .isEqualTo(expectedEmail);
         });
 
         step("Проверка формата полученного remoteAddr)", () -> {
-            assertThat(updateUserResponse
-                    .remoteAddr())
+            assertThat(changeUserResponse.remoteAddr())
                     .as("Проверка формата полученного ip-адреса")
                     .matches(IP_ADDRESS_REGEXP);
         });
@@ -136,69 +87,29 @@ public class UpdateUserTests extends TestBase {
     @DisplayName("Позитивный тест - полное обновление пользователя методом PATCH: 200 статус-код")
     @Test
     public void successfulUpdateUserWithPatchTest() {
-
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
-
-        RegistrationBodyModel registrationData = new RegistrationBodyModel
-                (expectedUsername, expectedPassword);
-
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
-
-
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel(expectedUsername, expectedPassword);
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
-
-        String accessToken = loginResponse.access();
-
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
         String expectedFirstName = getRandomFirstName();
         String expectedLastName = getRandomLastName();
         String expectedEmail = getRandomEmail();
 
-        UpdateUserBodyModel updateUser = new UpdateUserBodyModel(
-                expectedUsername,
-                expectedFirstName,
-                expectedLastName,
-                expectedEmail
-        );
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        UpdateUserResponseModel updateUserResponse =
-                step("Успешное полное обновление пользователя (метод PATCH)", () -> {
-                    return given(updateUserRequestSpec)
-                            .header("Authorization", "Bearer " + accessToken)
-                            .body(updateUser)
-                            .when()
-                            .patch("/users/me/")
-                            .then()
-                            .spec(updateUserResponseSpec)
-                            .extract()
-                            .as(UpdateUserResponseModel.class);
-                });
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String accessToken = AuthTokenPostApiClient.receiveAccessToken(loginRequest);
+
+        //обновление(PATCH)
+        UpdateUserBodyModel updateRequest = new UpdateUserBodyModel
+                (expectedUsername,expectedFirstName, expectedLastName, expectedEmail);
+        UpdateUserResponseModel changePatchUserResponse
+                = UsersMePatchApiClient.mainRequestPatch(updateRequest, accessToken); //должен передаваться и токен
 
         step("Проверка корректного обновления username)", () -> {
-            String actualUsername = updateUserResponse.username();
+            String actualUsername = changePatchUserResponse.username();
 
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
@@ -206,101 +117,64 @@ public class UpdateUserTests extends TestBase {
         });
 
         step("Проверка, что полученный id>0)", () -> {
-            assertThat(updateUserResponse.id())
+            assertThat(changePatchUserResponse.id())
                     .as("ID пользователя должен быть больше нуля")
                     .isGreaterThan(0);
         });
 
         step("Проверка корректного обновления firstName)", () -> {
-            assertThat(updateUserResponse.firstName())
+            assertThat(changePatchUserResponse.firstName())
                     .as("Проверка обновленного имени")
                     .isEqualTo(expectedFirstName);
         });
 
         step("Проверка корректного обновления lastName)", () -> {
-            assertThat(updateUserResponse.lastName())
+            assertThat(changePatchUserResponse.lastName())
                     .as("Проверка обновленной фамилии")
                     .isEqualTo(expectedLastName);
         });
 
         step("Проверка корректного обновления email)", () -> {
-            assertThat(updateUserResponse
-                    .email())
+            assertThat(changePatchUserResponse.email())
                     .as("Проверка обновленного email")
                     .isEqualTo(expectedEmail);
         });
 
         step("Проверка формата полученного remoteAddr)", () -> {
-            assertThat(updateUserResponse
-                    .remoteAddr())
+            assertThat(changePatchUserResponse.remoteAddr())
                     .as("Проверка формата полученного ip-адреса")
                     .matches(IP_ADDRESS_REGEXP);
         });
     }
 
+
+
     @DisplayName("Позитивный тест - частичное обновление пользователя методом PATCH: 200 статус-код")
     @Test
     public void successfulPartialUpdateUserWithPatchTest() {
-
-        String expectedUsername = getRandomUsername();
-        String expectedPassword = getRandomPassword();
-
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
-
-        LoginBodyModel loginData = new LoginBodyModel
-                (expectedUsername, expectedPassword);
-
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
-
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    return given(updateUserRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
-
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
         String expectedEmail = getRandomEmail();
 
-        PartialUpdateUserWithPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWithPatchBodyModel(
-                expectedUsername,
-                expectedEmail
-        );
 
-        UpdateUserResponseModel partialUpdateUserResponse =
-                step("Успешное частичное обновление пользователя (метод PATCH)", () -> {
-                    String accessToken = loginResponse.access();
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-                    return given(updateUserRequestSpec)
-                            //.config(timeoutConfig)
-                            .header("Authorization", "Bearer " + accessToken)
-                            .body(partialUpdateUserWitchPatch)
-                            .when()
-                            .patch("/users/me/")
-                            .then()
-                            .spec(partialUpdateUserWithPatchResponseSpec)
-                            .extract()
-                            .as(UpdateUserResponseModel.class);
-                });
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String accessToken = AuthTokenPostApiClient.receiveAccessToken(loginRequest);
+
+        //обновление(PATCH)
+        PartialUpdateUserWithPatchBodyModel partialUpdateRequest = new PartialUpdateUserWithPatchBodyModel
+                (expectedUsername, expectedEmail);
+        UpdateUserResponseModel partialPatchUserResponse
+                = UsersMePatchApiClient.partialPatchRequest
+                (partialUpdateRequest, accessToken);
 
         step("Проверка корректного обновления username)", () -> {
-            String actualUsername = partialUpdateUserWitchPatch.username();
+            String actualUsername = partialPatchUserResponse.username();
 
             assertThat(actualUsername)
                     .as("Проверка обновленного username")
@@ -308,13 +182,13 @@ public class UpdateUserTests extends TestBase {
         });
 
         step("Проверка корректного обновления email)", () -> {
-            assertThat(partialUpdateUserResponse.email())
+            assertThat(partialPatchUserResponse.email())
                     .as("Проверка обновленного email")
                     .isEqualTo(expectedEmail);
         });
 
         step("Проверка формата полученного remoteAddr)", () -> {
-            assertThat(partialUpdateUserResponse.remoteAddr())
+            assertThat(partialPatchUserResponse.remoteAddr())
                     .as("Проверка формата полученного ip-адреса")
                     .matches(IP_ADDRESS_REGEXP);
         });
@@ -327,63 +201,25 @@ public class UpdateUserTests extends TestBase {
         String expectedUsername = getRandomUsername();
         String expectedPassword = getRandomPassword();
 
-        RegistrationBodyModel registrationData = new RegistrationBodyModel(expectedUsername,
-                expectedPassword);
+        //регистрация пользователя
+        RegistrationBodyModel registrationRequest
+                = new RegistrationBodyModel(expectedUsername, expectedPassword);
+        UsersRegisterPostApiClient.mainRequest(registrationRequest);
 
-        step("Предусловие: успешная регистрация пользователя", () -> {
-            given(userRequestSpec)
-                    .config(timeoutConfig)
-                    .body(registrationData)
-                    .when()
-                    .post("users/register/")
-                    .then()
-                    .spec(successfulRegistrationResponseSpec)
-                    .extract()
-                    .as(SuccessfulRegistrationResponseRecordsModel.class);
-        });
+        //получение токена
+        LoginBodyModel loginRequest = new LoginBodyModel(expectedUsername, expectedPassword);
+        String accessToken = AuthTokenPostApiClient.receiveAccessToken(loginRequest);
 
-        SuccessfulLoginResponseModel loginResponse =
-                step("Отправка запроса на авторизацию (получени токена)", () -> {
-                    LoginBodyModel loginData = new LoginBodyModel
-                            (expectedUsername, expectedPassword);
-
-                    return given(userRequestSpec)
-                            .config(timeoutConfig)
-                            .body(loginData)
-                            .when()
-                            .post("/auth/token/")
-                            .then()
-                            .spec(successfulLoginResponseSpec)
-                            .extract()
-                            .as(SuccessfulLoginResponseModel.class);
-                });
-
-
-        UpdateUserResponseInvalidEmailModel partialUpdateUserResponse =
-                step("Неуспешное обновление пользователя (метод PATCH) - невалидный email", () -> {
-
-                    String accessToken = loginResponse.access();
-                    String expectedEmail = TestData.WRONG_EMAIL;
-
-                    PartialUpdateUserWithPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWithPatchBodyModel(
-                            expectedUsername,
-                            expectedEmail
-                    );
-
-                    return given(updateUserRequestSpec)
-                            .header("Authorization", "Bearer " + accessToken)
-                            .body(partialUpdateUserWitchPatch)
-                            .when()
-                            .patch("/users/me/")
-                            .then()
-                            .spec(invalidPartialUpdateUserWithPatchResponseSpec)
-                            .extract()
-                            .as(UpdateUserResponseInvalidEmailModel.class);
-                });
+        //обновление(PATCH)
+        PartialUpdateUserWithPatchBodyModel invalidPartialUpdateRequest = new PartialUpdateUserWithPatchBodyModel
+                (expectedUsername, TestData.WRONG_EMAIL);
+        UpdateUserResponseInvalidEmailModel invalidPartialPatchUserResponse
+                = UsersMePatchApiClient.invalidPartialRequest
+                (invalidPartialUpdateRequest, accessToken);
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
             //извлекаем текст ошибки
-            String actualEmailError = partialUpdateUserResponse.email().get(0);
+            String actualEmailError = invalidPartialPatchUserResponse.email().get(0);
 
             assertThat(actualEmailError)
                     .as("Проверка текста ошибки при вводе невалидного email")
@@ -395,71 +231,25 @@ public class UpdateUserTests extends TestBase {
     @Test
     public void unauthorizedUpdateUserWithPatchTest() {
 
-        String expectedUsername = getRandomUsername();
+        String expectedUsername = TestData.getRandomUsername();
+        String expectedPassword = TestData.getRandomPassword();
         String expectedEmail = getRandomEmail();
 
-        PartialUpdateUserWithPatchBodyModel partialUpdateUserWitchPatch = new PartialUpdateUserWithPatchBodyModel(
-                expectedUsername,
-                expectedEmail
-        );
-
-        DetailErrorResponseModel partialUpdateUserResponse =
-                step("Неуспешное обновление пользователя (метод PATCH) - без авторизации", () -> {
-                    return given(updateUserRequestSpec)
-                            .config(timeoutConfig)
-                            .body(partialUpdateUserWitchPatch)
-                            .when()
-                            .patch("/users/me/")
-                            .then()
-                            .spec(unauthorizedUpdateUserWithPatchResponseSpec)
-                            .extract()
-                            .as(DetailErrorResponseModel.class);
-                });
+        //обновление(PATCH)
+        PartialUpdateUserWithPatchBodyModel partialUpdateRequest = new PartialUpdateUserWithPatchBodyModel
+                (expectedUsername, expectedEmail);
+        DetailErrorResponseModel unauthorizedPatchUserResponse
+                = UsersMePatchApiClient.unauthorizedUpdateUserRequest(partialUpdateRequest);
 
         step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-            String actualDetail = partialUpdateUserResponse.detail();
+            String actualDetail = unauthorizedPatchUserResponse.detail();
             assertThat(actualDetail)
                     .as("Проверка текста ошибки при обновлении без авторизации (метод PATCH)")
                     .isEqualTo(EXPECTED_UNAUTHORIZED_ERROR);
         });
     }
 
-    @DisplayName("Негативный тест - обновление без авторизации методом PUT: 401 статус-код")
-    @Test
-    public void unauthorizedUpdateUserWithPutTest() {
-
-        String expectedUsername = getRandomUsername();
-        String expectedFirstName = getRandomFirstName();
-        String expectedLastName = getRandomLastName();
-        String expectedEmail = getRandomEmail();
-
-        UpdateUserBodyModel updateUser = new UpdateUserBodyModel(
-                expectedUsername,
-                expectedFirstName,
-                expectedLastName,
-                expectedEmail
-        );
-
-        DetailErrorResponseModel partialUpdateUserResponse =
-                step("Неуспешное обновление пользователя (метод PUT) - без авторизации", () -> {
-                    return given(updateUserRequestSpec)
-                            .body(updateUser)
-                            .when()
-                            .put("/users/me/")
-                            .then()
-                            .spec(unauthorizedUpdateUserWithPutResponseSpec)
-                            .extract()
-                            .as(DetailErrorResponseModel.class);
-                });
-
-        step("Верификация сообщения об ошибке валидации бэкенда (400)", () -> {
-            String actualDetail = partialUpdateUserResponse.detail();
-            assertThat(actualDetail)
-                    .as("Проверка текста ошибки при обновлении без авторизации (метод PUT)")
-                    .isEqualTo(EXPECTED_UNAUTHORIZED_ERROR);
-        });
-    }
-}
+   }
 
 
 

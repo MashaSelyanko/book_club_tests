@@ -142,4 +142,16 @@ public class AuthTokenPostApiClient {
                 .extract()
                 .path("refresh");
     }
+
+    @Step("Отправка запроса на авторизацию и получение access-токена")
+    public static String receiveAccessToken(LoginBodyModel body) {
+        return given(userRequestSpec)
+                .body(body)
+                .when()
+                .post("/auth/token/")
+                .then()
+                .spec(successfulLoginResponseSpec)
+                .extract()
+                .path("access");
+    }
 }
